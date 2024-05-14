@@ -1,6 +1,7 @@
 # IDE 和编辑器
 .idea
 .vscode
+/**/.DS_Store
 
 # 配置文件
 config/*.yaml
