@@ -1,0 +1,10 @@
+# IDE 和编辑器
+.idea
+.vscode
+
+# 配置文件
+config/*.yaml
+
+# 日志文件
+app/**/storage/*.log
+storage/*.log

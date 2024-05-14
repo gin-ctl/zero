@@ -1,0 +1,17 @@
+package bootstrap
+
+import (
+	m "zero/app/middleware"
+	"github.com/gin-gonic/gin"
+)
+
+func RegisterGlobalMiddleware(router *gin.Engine) {
+	router.Use(
+		m.Logger(),
+		m.Recovery(),
+		m.Cors(),
+		m.ForceUA(),
+
+		// {{.GlobalMiddleware}}
+	)
+}

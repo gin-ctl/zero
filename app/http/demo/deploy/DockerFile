@@ -1,0 +1,26 @@
+FROM golang:1.21.10 AS go_builder
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOPROXY=https://goproxy.cn,direct
+
+WORKDIR /app
+COPY . .
+RUN go mod tidy
+RUN go build -o demo .
+
+FROM alpine:3.9.6
+RUN sed -i -e 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
+
+ENV TZ Asia/Shanghai
+RUN apk add tzdata
+
+
+COPY --from=go_builder /app/demo /demo
+COPY --from=go_builder /app/config/env.yaml /config/env.yaml
+
+
+EXPOSE 80
+ENTRYPOINT ["./demo"]
