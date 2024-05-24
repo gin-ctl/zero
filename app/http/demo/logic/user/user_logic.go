@@ -12,7 +12,7 @@ type Request struct {
 	Id   uint64 `path:"id"`
 	Page uint   `query:"page"`
 	Size uint   `query:"size"`
-	Name string `json:"name"`
+	Name string `form:"name"`
 	//FullName  string `json:"name"`
 	FolderId  uint64 `json:"folder_id"`
 	IsDeleted bool   `json:"is_deleted"`

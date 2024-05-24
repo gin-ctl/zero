@@ -32,31 +32,39 @@ func (r RequestType[T]) Data() T {
 
 // Parse is a function that parses request parameters into the provided struct
 func Parse[T any](c *gin.Context, obj T) (RequestType[T], error) {
-	val := reflect.ValueOf(&obj).Elem()
-	typ := val.Type()
 
-	for i := 0; i < val.NumField(); i++ {
-		field := val.Field(i)
-		fieldType := typ.Field(i)
-		tag := fieldType.Tag
-
-		switch field.Kind() {
-		case reflect.String:
-			parseStringField(c, &field, tag)
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			parseIntField(c, &field, tag)
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			parseUintField(c, &field, tag)
-		case reflect.Bool:
-			parseBoolField(c, &field, tag)
-		case reflect.Float32, reflect.Float64:
-			parseFloatField(c, &field, tag)
-		case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-			parseComplexField(c, &field, tag)
-		case reflect.Ptr:
-			parsePtrField(c, &field, tag)
-		}
+	// Handle the JSON binding first
+	if err := c.ShouldBind(&obj); err != nil {
+		return RequestType[T]{}, err
 	}
+
+	// todo parse path params
+
+	//val := reflect.ValueOf(&obj).Elem()
+	//typ := val.Type()
+	//
+	//for i := 0; i < val.NumField(); i++ {
+	//	field := val.Field(i)
+	//	fieldType := typ.Field(i)
+	//	tag := fieldType.Tag
+	//
+	//	switch field.Kind() {
+	//	case reflect.String:
+	//		parseStringField(c, &field, tag)
+	//	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+	//		parseIntField(c, &field, tag)
+	//	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+	//		parseUintField(c, &field, tag)
+	//	case reflect.Bool:
+	//		parseBoolField(c, &field, tag)
+	//	case reflect.Float32, reflect.Float64:
+	//		parseFloatField(c, &field, tag)
+	//	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
+	//		parseComplexField(c, &field, tag)
+	//	case reflect.Ptr:
+	//		parsePtrField(c, &field, tag)
+	//	}
+	//}
 
 	return NewRequestType(obj), nil
 }
@@ -71,12 +79,6 @@ func parseStringField(c *gin.Context, field *reflect.Value, tag reflect.StructTa
 	}
 	if formTag, ok := tag.Lookup(FORM); ok {
 		field.SetString(c.PostForm(formTag))
-	}
-	if _, ok := tag.Lookup(JSON); ok {
-		var str string
-		if err := c.ShouldBindJSON(&str); err == nil {
-			field.SetString(str)
-		}
 	}
 }
 
@@ -95,12 +97,6 @@ func parseIntField(c *gin.Context, field *reflect.Value, tag reflect.StructTag) 
 	if formTag, ok := tag.Lookup(FORM); ok {
 		if va, err := strconv.ParseInt(c.PostForm(formTag), 10, 64); err == nil {
 			field.SetInt(va)
-		}
-	}
-	if _, ok := tag.Lookup(JSON); ok {
-		var n int64
-		if err := c.ShouldBindJSON(&n); err == nil {
-			field.SetInt(n)
 		}
 	}
 }
@@ -122,12 +118,6 @@ func parseUintField(c *gin.Context, field *reflect.Value, tag reflect.StructTag)
 			field.SetUint(va)
 		}
 	}
-	if _, ok := tag.Lookup(JSON); ok {
-		var n uint64
-		if err := c.ShouldBindJSON(&n); err == nil {
-			field.SetUint(n)
-		}
-	}
 }
 
 // Helper function to parse boolean fields
@@ -147,12 +137,6 @@ func parseBoolField(c *gin.Context, field *reflect.Value, tag reflect.StructTag)
 			field.SetBool(va)
 		}
 	}
-	if _, ok := tag.Lookup(JSON); ok {
-		var b bool
-		if err := c.ShouldBindJSON(&b); err == nil {
-			field.SetBool(b)
-		}
-	}
 }
 
 // Helper function to parse float fields
@@ -170,12 +154,6 @@ func parseFloatField(c *gin.Context, field *reflect.Value, tag reflect.StructTag
 	if formTag, ok := tag.Lookup(FORM); ok {
 		if va, err := strconv.ParseFloat(c.PostForm(formTag), 64); err == nil {
 			field.SetFloat(va)
-		}
-	}
-	if _, ok := tag.Lookup(JSON); ok {
-		var f float64
-		if err := c.ShouldBindJSON(&f); err == nil {
-			field.SetFloat(f)
 		}
 	}
 }
