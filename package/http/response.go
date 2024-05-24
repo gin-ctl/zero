@@ -13,6 +13,26 @@ func Success(c *gin.Context) {
 		"code":    StatusOK,
 		"message": StatusText(StatusOK),
 	})
+	return
+}
+
+// SuccessWithData 请求成功，返回结果
+func SuccessWithData(c *gin.Context, data any) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    StatusOK,
+		"message": StatusText(StatusOK),
+		"data":    data,
+	})
+	return
+}
+
+// Fail 请求失败
+func Fail(c *gin.Context, err error) {
+	c.JSON(http.StatusOK, gin.H{
+		"code":    Failure,
+		"message": err.Error(),
+	})
+	return
 }
 
 // Alert404Route 路由不存在
@@ -23,6 +43,7 @@ func Alert404Route(router *gin.Engine) {
 			"message": StatusText(StatusNotFound),
 		})
 	})
+	return
 }
 
 // Alert400WithoutMessage 客户端请求错误 不传具体信息
@@ -31,6 +52,7 @@ func Alert400WithoutMessage(c *gin.Context, code Code) {
 		"code":    code,
 		"message": StatusText(code),
 	})
+	return
 }
 
 // Alert400 客户端请求错误
@@ -42,6 +64,7 @@ func Alert400(c *gin.Context, code Code, message string) {
 		"code":    code,
 		"message": message,
 	})
+	return
 }
 
 // Alert500WithoutMessage 系统错误 不传具体信息
@@ -50,6 +73,7 @@ func Alert500WithoutMessage(c *gin.Context, code Code) {
 		"code":    code,
 		"message": StatusText(code),
 	})
+	return
 }
 
 // Alert500 系统错误
@@ -61,10 +85,12 @@ func Alert500(c *gin.Context, code Code, message string) {
 		"code":    code,
 		"message": message,
 	})
+	return
 }
 
 const (
 	StatusOK Code = 200
+	Failure  Code = 1
 )
 
 const (
