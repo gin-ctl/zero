@@ -38,33 +38,31 @@ func Parse[T any](c *gin.Context, obj T) (RequestType[T], error) {
 		return RequestType[T]{}, err
 	}
 
-	// todo parse path params
+	val := reflect.ValueOf(&obj).Elem()
+	typ := val.Type()
 
-	//val := reflect.ValueOf(&obj).Elem()
-	//typ := val.Type()
-	//
-	//for i := 0; i < val.NumField(); i++ {
-	//	field := val.Field(i)
-	//	fieldType := typ.Field(i)
-	//	tag := fieldType.Tag
-	//
-	//	switch field.Kind() {
-	//	case reflect.String:
-	//		parseStringField(c, &field, tag)
-	//	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-	//		parseIntField(c, &field, tag)
-	//	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-	//		parseUintField(c, &field, tag)
-	//	case reflect.Bool:
-	//		parseBoolField(c, &field, tag)
-	//	case reflect.Float32, reflect.Float64:
-	//		parseFloatField(c, &field, tag)
-	//	case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
-	//		parseComplexField(c, &field, tag)
-	//	case reflect.Ptr:
-	//		parsePtrField(c, &field, tag)
-	//	}
-	//}
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Field(i)
+		fieldType := typ.Field(i)
+		tag := fieldType.Tag
+
+		switch field.Kind() {
+		case reflect.String:
+			parseStringField(c, &field, tag)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			parseIntField(c, &field, tag)
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			parseUintField(c, &field, tag)
+		case reflect.Bool:
+			parseBoolField(c, &field, tag)
+		case reflect.Float32, reflect.Float64:
+			parseFloatField(c, &field, tag)
+		case reflect.Struct, reflect.Map, reflect.Slice, reflect.Array:
+			parseComplexField(c, &field, tag)
+		case reflect.Ptr:
+			parsePtrField(c, &field, tag)
+		}
+	}
 
 	return NewRequestType(obj), nil
 }
@@ -77,9 +75,6 @@ func parseStringField(c *gin.Context, field *reflect.Value, tag reflect.StructTa
 	if queryTag, ok := tag.Lookup(QUERY); ok {
 		field.SetString(c.Query(queryTag))
 	}
-	if formTag, ok := tag.Lookup(FORM); ok {
-		field.SetString(c.PostForm(formTag))
-	}
 }
 
 // Helper function to parse integer fields
@@ -91,11 +86,6 @@ func parseIntField(c *gin.Context, field *reflect.Value, tag reflect.StructTag) 
 	}
 	if queryTag, ok := tag.Lookup(QUERY); ok {
 		if va, err := strconv.ParseInt(c.Query(queryTag), 10, 64); err == nil {
-			field.SetInt(va)
-		}
-	}
-	if formTag, ok := tag.Lookup(FORM); ok {
-		if va, err := strconv.ParseInt(c.PostForm(formTag), 10, 64); err == nil {
 			field.SetInt(va)
 		}
 	}
@@ -113,11 +103,6 @@ func parseUintField(c *gin.Context, field *reflect.Value, tag reflect.StructTag)
 			field.SetUint(va)
 		}
 	}
-	if formTag, ok := tag.Lookup(FORM); ok {
-		if va, err := strconv.ParseUint(c.PostForm(formTag), 10, 64); err == nil {
-			field.SetUint(va)
-		}
-	}
 }
 
 // Helper function to parse boolean fields
@@ -132,11 +117,6 @@ func parseBoolField(c *gin.Context, field *reflect.Value, tag reflect.StructTag)
 			field.SetBool(va)
 		}
 	}
-	if formTag, ok := tag.Lookup(FORM); ok {
-		if va, err := strconv.ParseBool(c.PostForm(formTag)); err == nil {
-			field.SetBool(va)
-		}
-	}
 }
 
 // Helper function to parse float fields
@@ -148,11 +128,6 @@ func parseFloatField(c *gin.Context, field *reflect.Value, tag reflect.StructTag
 	}
 	if queryTag, ok := tag.Lookup(QUERY); ok {
 		if va, err := strconv.ParseFloat(c.Query(queryTag), 64); err == nil {
-			field.SetFloat(va)
-		}
-	}
-	if formTag, ok := tag.Lookup(FORM); ok {
-		if va, err := strconv.ParseFloat(c.PostForm(formTag), 64); err == nil {
 			field.SetFloat(va)
 		}
 	}
