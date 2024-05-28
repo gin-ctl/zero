@@ -3,11 +3,11 @@ package logger
 import (
 	"context"
 	"errors"
+	"github.com/gin-ctl/zero/package/helper"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
-	"zero/package/helper"
 
 	"go.uber.org/zap"
 	"gorm.io/gorm"

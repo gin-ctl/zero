@@ -1,4 +1,4 @@
-module zero
+module github.com/gin-ctl/zero
 
 go 1.21.10
 

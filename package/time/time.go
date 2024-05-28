@@ -41,9 +41,10 @@ func (t Time) Local() time.Time {
 }
 
 func (t Time) Value() (driver.Value, error) {
-	var zeroTime time.Time
+	var github.com/gin - ctl/zeroTime
+	time.Time
 	var ti = time.Time(t)
-	if ti.UnixNano() == zeroTime.UnixNano() {
+	if ti.UnixNano() == github.com/gin-ctl/zeroTime.UnixNano() {
 		return nil, nil
 	}
 	return ti, nil

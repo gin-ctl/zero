@@ -1,8 +1,8 @@
 package middlewares
 
 import (
+	"github.com/gin-ctl/zero/package/http"
 	"github.com/gin-gonic/gin"
-	"zero/package/http"
 )
 
 // ForceUA 中间件，强制请求头部必须附带 User-Agent

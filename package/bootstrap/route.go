@@ -1,10 +1,10 @@
 package bootstrap
 
 import (
+	"github.com/gin-ctl/zero/app/http/demo/route"
+	"github.com/gin-ctl/zero/app/middleware"
+	"github.com/gin-ctl/zero/package/http"
 	"github.com/gin-gonic/gin"
-	"zero/app/http/demo/route"
-	"zero/app/middleware"
-	"zero/package/http"
 )
 
 func RegisterGlobalMiddleware(router *gin.Engine) {

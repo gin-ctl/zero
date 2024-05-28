@@ -3,12 +3,12 @@ package bootstrap
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-ctl/zero/package/get"
+	"github.com/gin-ctl/zero/package/logger"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	gl "gorm.io/gorm/logger"
 	"time"
-	"zero/package/get"
-	"zero/package/logger"
 )
 
 var (

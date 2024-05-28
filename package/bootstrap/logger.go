@@ -1,8 +1,8 @@
 package bootstrap
 
 import (
-	"zero/package/get"
-	"zero/package/logger"
+	"github.com/gin-ctl/zero/package/get"
+	"github.com/gin-ctl/zero/package/logger"
 )
 
 func SetupLogger() {

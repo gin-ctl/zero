@@ -1,21 +1,46 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"fmt"
+	"github.com/gin-ctl/zero/package/bootstrap"
+	"github.com/gin-ctl/zero/package/console"
+	"github.com/gin-ctl/zero/package/get"
+	"github.com/gin-ctl/zero/tools/api"
+	"github.com/gin-ctl/zero/tools/model"
+	"github.com/spf13/cobra"
+	"os"
+)
 
 func main() {
 
+	pwd, err := os.Getwd()
+	if err != nil {
+		console.Error(err.Error())
+		return
+	}
+	if _, err = os.Stat(fmt.Sprintf("%s/config/env.yaml", pwd)); os.IsNotExist(err) {
+		console.Error("config/env.yaml not found.")
+		return
+	}
+	// Load configuration file.
+	get.NewViper("env.yaml", fmt.Sprintf("%s/config", pwd))
+	// Start basic services.
+	bootstrap.SetupLogger()
+	bootstrap.SetupDB()
+
+	// This is a basic CLI application.
 	var rootCmd = &cobra.Command{
-		Use:   "zero",
-		Short: "gc",
-		Long:  `可以用 -h 查看更多命令`,
+		Use:   "ginctl",
+		Short: "gin ctl",
+		Long:  `This is a basic CLI application.`,
 	}
 
 	rootCmd.AddCommand(
-	//cmd.MakeAPI(),
-	//cmd.MakeModel(),
+		model.GenerateModelStruct(),
+		api.GenerateSourceApi(),
 	)
 
-	// 执行命令
+	// Execute command.
 	cobra.CheckErr(rootCmd.Execute())
 
 }

@@ -2,8 +2,8 @@ package bootstrap
 
 import (
 	"fmt"
-	"zero/package/get"
-	rds "zero/package/redis"
+	"github.com/gin-ctl/zero/package/get"
+	rds "github.com/gin-ctl/zero/package/redis"
 )
 
 // SetupRedis 初始化 Redis

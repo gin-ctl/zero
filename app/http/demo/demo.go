@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/gin-ctl/zero/package/bootstrap"
+	"github.com/gin-ctl/zero/package/get"
 	"github.com/gin-gonic/gin"
 	"log"
-	"zero/bootstrap"
-	"zero/package/get"
 )
 
 func main() {

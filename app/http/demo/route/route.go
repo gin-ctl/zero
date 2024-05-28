@@ -1,8 +1,8 @@
 package route
 
 import (
+	"github.com/gin-ctl/zero/app/http/demo/logic/user"
 	"github.com/gin-gonic/gin"
-	"zero/app/http/demo/logic/user"
 )
 
 func RegisterDemoAPI(r *gin.Engine) {

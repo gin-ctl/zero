@@ -2,11 +2,11 @@ package middlewares
 
 import (
 	"bytes"
+	"github.com/gin-ctl/zero/package/helper"
+	"github.com/gin-ctl/zero/package/logger"
 	"io"
 	"net/http"
 	"time"
-	"zero/package/helper"
-	"zero/package/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
