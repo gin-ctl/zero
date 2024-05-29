@@ -3,7 +3,7 @@ package base
 import "github.com/gin-ctl/zero/package/time"
 
 type PrimaryKey struct {
-	Id uint64 `gorm:"column:id;primaryKey;autoIncrement;" json:"id,optional"`
+	Id uint64 `gorm:"column:id;primaryKey;autoIncrement" json:"id,optional"`
 }
 
 type CommonTime struct {

@@ -1,0 +1,16 @@
+package model
+
+import (
+    "encoding/json"
+	"github.com/gin-ctl/zero/package/time"
+)
+
+{{.Struct}}
+
+func (p *{{.CamelCase}}) TableName() string {
+	return "{{.TableName}}"
+}
+
+func New{{.CamelCase}}() *{{.CamelCase}} {
+	return &{{.CamelCase}}{}
+}

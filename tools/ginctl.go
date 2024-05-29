@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-ctl/zero/package/bootstrap"
+	"github.com/gin-ctl/zero/bootstrap"
 	"github.com/gin-ctl/zero/package/console"
 	"github.com/gin-ctl/zero/package/get"
 	"github.com/gin-ctl/zero/tools/api"

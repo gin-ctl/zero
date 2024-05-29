@@ -3,62 +3,93 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-ctl/zero/package/bootstrap"
+	"github.com/gin-ctl/zero/bootstrap"
+	"github.com/gin-ctl/zero/package/get"
 	"strings"
 	"unicode"
 )
 
+type Table struct {
+	TableName string `gorm:"column:TABLE_NAME"`
+	CamelCase string `gorm:"-"`
+	Struct    string `gorm:"-"`
+}
+
 type Column struct {
-	Name                   string `gorm:"COLUMN_NAME"`
-	Type                   string `gorm:"COLUMN_TYPE"`
-	IsNullAble             string `gorm:"IS_NULLABLE"`
-	CharacterMaximumLength *int   `gorm:"CHARACTER_MAXIMUM_LENGTH"`
-	Extra                  string `gorm:"EXTRA"`
-	Comment                string `json:"COLUMN_COMMENT"`
+	Name                   string `gorm:"column:COLUMN_NAME"`
+	Type                   string `gorm:"column:COLUMN_TYPE"`
+	IsNullAble             string `gorm:"column:IS_NULLABLE"`
+	CharacterMaximumLength *int   `gorm:"column:CHARACTER_MAXIMUM_LENGTH"`
+	Extra                  string `gorm:"column:EXTRA"`
+	Comment                string `gorm:"column:COLUMN_COMMENT"`
+}
+
+func GetTables(args string) (tables []*Table, err error) {
+	// get tables.
+	if args == "LICENSE" {
+		err = bootstrap.DB.Raw("SELECT table_name FROM information_schema.tables WHERE table_schema=?;",
+			get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
+			Scan(&tables).Error
+		if err == nil {
+			for i, table := range tables {
+				table.CamelCase = camelCase(table.TableName)
+				tables[i] = table
+			}
+		}
+	} else {
+		for _, name := range strings.Split(args, ",") {
+			// check table is existed.
+			exist := bootstrap.DB.Migrator().HasTable(name)
+			if !exist {
+				err = errors.New(fmt.Sprintf("`%s` not found.", name))
+				return
+			}
+			tables = append(tables, &Table{
+				TableName: name,
+				CamelCase: camelCase(name),
+			})
+		}
+	}
+	return
 }
 
 func GetColumn(tableName string) (columns []*Column, err error) {
-
-	// check table is exist.
-	exist := bootstrap.DB.Migrator().HasTable(tableName)
-	if !exist {
-		err = errors.New(fmt.Sprintf("`%s` not found.", tableName))
-		return
-	}
-
 	// get table columns.
-	query := fmt.Sprintf("SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,CHARACTER_MAXIMUM_LENGTH,EXTRA,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '%s';", tableName)
-	err = bootstrap.DB.Raw(query).Scan(&columns).Error
-	if err != nil {
-		return
-	}
+	err = bootstrap.DB.Raw("SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,CHARACTER_MAXIMUM_LENGTH,EXTRA,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?;",
+		tableName, get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
+		Scan(&columns).Error
 
 	return
 }
 
-func GenerateStruct(columns []*Column) string {
+func GenerateStruct(tableName string, columns []*Column) string {
 	var builder strings.Builder
-	builder.WriteString("type YourStruct struct {\n")
+	builder.WriteString(fmt.Sprintf("type %s struct {\n", camelCase(tableName)))
 	for _, col := range columns {
 		fieldName := camelCase(col.Name)
 		goType := mapSQLTypeToGoType(col.Type)
-		jsonTag := fmt.Sprintf("json:\"%s\"", fieldName)
-		gormTag := fmt.Sprintf("gorm:\"column:%s\"", col.Name)
-		validateTag := "omitempty"
+		jsonTag := fmt.Sprintf("json:\"%s\"", col.Name)
+		gormTag := fmt.Sprintf("gorm:\"column:%s", col.Name)
 
-		if col.IsNullAble == "YES" {
-			validateTag = "required"
+		if strings.ToLower(col.Extra) == "auto_increment" {
+			gormTag = fmt.Sprintf("%s;primaryKey;autoIncrement\"", gormTag)
+		} else {
+			gormTag += "\""
 		}
 
+		validateTag := "omitempty"
+		if col.IsNullAble == "NO" {
+			validateTag = "required"
+		}
 		switch goType {
 		case "string":
 			if col.CharacterMaximumLength != nil {
 				validateTag = fmt.Sprintf("%s,max=%d", validateTag, *col.CharacterMaximumLength)
 			}
-		case "int", "int8", "int16", "int32", "int64", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
+		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
 			validateTag = fmt.Sprintf("%s,numeric", validateTag)
 		case "time.Time":
-			validateTag = fmt.Sprintf("%s,datetime", validateTag)
+			validateTag = "omitempty,datetime"
 		}
 
 		if validateTag != "" {
@@ -103,6 +134,8 @@ func mapSQLTypeToGoType(sqlType string) string {
 		return "[]byte"
 	case "varchar", "char", "text", "tinytext", "mediumtext", "longtext", "enum", "set":
 		return "string"
+	case "json":
+		return "json.RawMessage"
 	case "date", "time", "datetime", "timestamp":
 		return "time.Time"
 	default:
