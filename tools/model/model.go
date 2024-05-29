@@ -20,11 +20,13 @@ func GenerateModelStruct() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "model",
 		Short: "make model",
-		Long:  "Generates a mapping structure for a table based on the database table name.",
-		RunE:  GenModelStruct,
+		Long: `Generates a mapping structure for a table based on the database table name.
+Enter --table = * or -t = * to generate all table mapping structures. Multiple tables are separated by ",".
+		`,
+		RunE: GenModelStruct,
 	}
 
-	cmd.Flags().StringVarP(&tableName, "table", "t", "*", "Specify table name")
+	cmd.Flags().StringVarP(&tableName, "table", "t", "", "Specify table name")
 
 	return cmd
 }
