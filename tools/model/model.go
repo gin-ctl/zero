@@ -44,20 +44,20 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 		errs := os.Mkdir(dir, os.ModePerm)
 		if errs != nil {
 			console.Error(errs.Error())
-			return errs
+			return
 		}
 	}
 
 	temp, err := template.ParseFiles(fmt.Sprintf("%s/tools/model/stub/model.stub", pwd))
 	if err != nil {
 		console.Error(err.Error())
-		return err
+		return
 	}
 
 	tables, err := GetTables(tableName)
 	if err != nil {
 		console.Error(err.Error())
-		return err
+		return
 	}
 
 	var wg sync.WaitGroup

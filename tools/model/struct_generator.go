@@ -54,6 +54,7 @@ func GetTables(args string) (tables []*Table, err error) {
 }
 
 func GetColumn(tableName string) (columns []*Column, err error) {
+
 	// get table columns.
 	err = bootstrap.DB.Raw("SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,CHARACTER_MAXIMUM_LENGTH,EXTRA,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?;",
 		tableName, get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
