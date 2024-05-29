@@ -41,6 +41,13 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 		console.Error(err.Error())
 		return
 	}
+	if _, e := os.Stat(fmt.Sprintf("%s/model", pwd)); os.IsNotExist(e) {
+		errs := os.Mkdir(fmt.Sprintf("%s/model", pwd), os.ModePerm)
+		if errs != nil {
+			console.Error(errs.Error())
+			return
+		}
+	}
 
 	// get sql database.
 	database := get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))
