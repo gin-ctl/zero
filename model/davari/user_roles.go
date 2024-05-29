@@ -1,8 +1,7 @@
 package model
 
 import (
-    "encoding/json"
-	"github.com/gin-ctl/zero/package/time"
+  	"github.com/gin-ctl/zero/package/time"
 )
 
 type UserRoles struct {

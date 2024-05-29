@@ -1,9 +1,6 @@
 package model
 
-import (
-    "encoding/json"
-	"github.com/gin-ctl/zero/package/time"
-)
+{{.Import}}
 
 {{.Struct}}
 

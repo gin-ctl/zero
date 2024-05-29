@@ -1,11 +1,10 @@
 package model
 
 import (
-    "encoding/json"
-	"github.com/gin-ctl/zero/package/time"
+  	"github.com/gin-ctl/zero/package/time"
 )
 
-type User struct {
+type AdminUsers struct {
     Id int32 `json:"id" gorm:"column:id;primaryKey;autoIncrement" validate:"required,numeric"`
     Username string `json:"username" gorm:"column:username" validate:"required,max=255"`
     Password string `json:"password" gorm:"column:password" validate:"required,max=255"`
@@ -14,10 +13,10 @@ type User struct {
 }
 
 
-func (p *User) TableName() string {
-	return "user"
+func (p *AdminUsers) TableName() string {
+	return "admin_users"
 }
 
-func NewUser() *User {
-	return &User{}
+func NewAdminUsers() *AdminUsers {
+	return &AdminUsers{}
 }

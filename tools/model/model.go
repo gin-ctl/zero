@@ -2,9 +2,12 @@ package model
 
 import (
 	"fmt"
+	"github.com/gin-ctl/zero/bootstrap"
 	"github.com/gin-ctl/zero/package/console"
+	"github.com/gin-ctl/zero/package/get"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 	"sync"
 	"text/template"
 )
@@ -39,7 +42,10 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 		return
 	}
 
-	dir := fmt.Sprintf("%s/model", pwd)
+	// get sql database.
+	database := get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))
+	// get dir.
+	dir := fmt.Sprintf("%s/model/%s", pwd, database)
 	if _, e := os.Stat(dir); os.IsNotExist(e) {
 		errs := os.Mkdir(dir, os.ModePerm)
 		if errs != nil {
@@ -79,12 +85,29 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 
 				table.Struct = GenerateStruct(table.TableName, columns)
 
+				// Handling import packages.
+				pkg := ""
+				if strings.Contains(table.Struct, "json.RawMessage") {
+					pkg += "\"encoding/json\"\n"
+				}
+				if strings.Contains(table.Struct, "") {
+					pkg += "\t\"github.com/gin-ctl/zero/package/time\""
+				}
+				if pkg != "" {
+					table.Import = fmt.Sprintf("import (\n  %s\n)", pkg)
+				}
+
 				newFile, ers := os.Create(filePath)
 				if ers != nil {
 					errChan <- ers
 					return
 				}
-				defer newFile.Close()
+				defer func(newFile *os.File) {
+					e := newFile.Close()
+					if e != nil {
+						errChan <- e
+					}
+				}(newFile)
 
 				err = temp.Execute(newFile, table)
 				if err != nil {

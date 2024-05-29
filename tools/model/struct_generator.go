@@ -13,6 +13,7 @@ type Table struct {
 	TableName string `gorm:"column:TABLE_NAME"`
 	CamelCase string `gorm:"-"`
 	Struct    string `gorm:"-"`
+	Import    string `gorm:"-"`
 }
 
 type Column struct {
@@ -26,7 +27,7 @@ type Column struct {
 
 func GetTables(args string) (tables []*Table, err error) {
 	// get tables.
-	if args == "LICENSE" {
+	if args == `*` {
 		err = bootstrap.DB.Raw("SELECT table_name FROM information_schema.tables WHERE table_schema=?;",
 			get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
 			Scan(&tables).Error
