@@ -39,7 +39,8 @@ func GenerateModelStruct() *cobra.Command {
 		Use:   "model",
 		Short: "make model",
 		Long: `Generates a mapping structure for a table based on the database table name.
-Enter --table * or -t * to generate all table mapping structures. Multiple tables are separated by ",".
+Enter --table * or -t * to generate all table mapping structures. 
+Multiple tables are separated by ",".
 		`,
 		RunE: GenModelStruct,
 	}
