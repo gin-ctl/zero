@@ -5,6 +5,7 @@ import (
 	"github.com/gin-ctl/zero/bootstrap"
 	"github.com/gin-ctl/zero/package/console"
 	"github.com/gin-ctl/zero/package/get"
+	"github.com/gin-ctl/zero/package/helper"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
@@ -15,6 +16,23 @@ import (
 var (
 	tableName string
 )
+
+func init() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		console.Error(err.Error())
+		return
+	}
+	if _, err = os.Stat(fmt.Sprintf("%s/config/env.yaml", pwd)); os.IsNotExist(err) {
+		console.Error("config/env.yaml not found.")
+		return
+	}
+	// Load configuration file.
+	get.NewViper("env.yaml", fmt.Sprintf("%s/config", pwd))
+	// Start basic services.
+	bootstrap.SetupLogger()
+	bootstrap.SetupDB()
+}
 
 func GenerateModelStruct() *cobra.Command {
 	cmd := &cobra.Command{
@@ -43,27 +61,17 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 		console.Error(err.Error())
 		return
 	}
-	if _, e := os.Stat(fmt.Sprintf("%s/model", pwd)); os.IsNotExist(e) {
-		errs := os.Mkdir(fmt.Sprintf("%s/model", pwd), os.ModePerm)
-		if errs != nil {
-			console.Error(errs.Error())
-			return
-		}
-	}
-
 	// get sql database.
 	database := get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))
 	// get dir.
 	dir := fmt.Sprintf("%s/model/%s", pwd, database)
-	if _, e := os.Stat(dir); os.IsNotExist(e) {
-		errs := os.Mkdir(dir, os.ModePerm)
-		if errs != nil {
-			console.Error(errs.Error())
-			return
-		}
+	err = helper.CreateDirIfNotExist(dir)
+	if err != nil {
+		console.Error(err.Error())
+		return
 	}
 
-	temp, err := template.ParseFiles(fmt.Sprintf("%s/tools/model/stub/model.stub", pwd))
+	temp, err := template.ParseFiles(fmt.Sprintf("%s/tools/ginctl/model/stub/model.stub", pwd))
 	if err != nil {
 		console.Error(err.Error())
 		return

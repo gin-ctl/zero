@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-ctl/zero/bootstrap"
 	"github.com/gin-ctl/zero/package/get"
+	"github.com/gin-ctl/zero/package/helper"
 	"strings"
-	"unicode"
 )
 
 type Table struct {
@@ -33,7 +33,7 @@ func GetTables(args string) (tables []*Table, err error) {
 			Scan(&tables).Error
 		if err == nil {
 			for i, table := range tables {
-				table.CamelCase = camelCase(table.TableName)
+				table.CamelCase = helper.CamelCase(table.TableName)
 				tables[i] = table
 			}
 		}
@@ -47,7 +47,7 @@ func GetTables(args string) (tables []*Table, err error) {
 			}
 			tables = append(tables, &Table{
 				TableName: name,
-				CamelCase: camelCase(name),
+				CamelCase: helper.CamelCase(name),
 			})
 		}
 	}
@@ -66,9 +66,9 @@ func GetColumn(tableName string) (columns []*Column, err error) {
 
 func GenerateStruct(tableName string, columns []*Column) string {
 	var builder strings.Builder
-	builder.WriteString(fmt.Sprintf("type %s struct {\n", camelCase(tableName)))
+	builder.WriteString(fmt.Sprintf("type %s struct {\n", helper.CamelCase(tableName)))
 	for _, col := range columns {
-		fieldName := camelCase(col.Name)
+		fieldName := helper.CamelCase(col.Name)
 		goType := mapSQLTypeToGoType(col.Type)
 		jsonTag := fmt.Sprintf("json:\"%s\"", col.Name)
 		gormTag := fmt.Sprintf("gorm:\"column:%s", col.Name)
@@ -143,24 +143,4 @@ func mapSQLTypeToGoType(sqlType string) string {
 	default:
 		return "string"
 	}
-}
-
-func camelCase(input string) string {
-	var output []rune
-	toUpper := true
-
-	for _, r := range input {
-		if r == '_' {
-			toUpper = true
-			continue
-		}
-		if toUpper {
-			output = append(output, unicode.ToUpper(r))
-			toUpper = false
-		} else {
-			output = append(output, unicode.ToLower(r))
-		}
-	}
-
-	return string(output)
 }

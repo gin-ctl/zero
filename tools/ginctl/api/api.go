@@ -2,7 +2,7 @@ package api
 
 import "github.com/spf13/cobra"
 
-func GenerateSourceApi() *cobra.Command {
+func GenerateApi() *cobra.Command {
 	var (
 		path  string
 		model string
@@ -12,7 +12,7 @@ func GenerateSourceApi() *cobra.Command {
 		Use:   "api",
 		Short: "make api",
 		Long:  "Specifies the standard restful APIs for table generation",
-		RunE:  GenSourceApi,
+		RunE:  GenApi,
 	}
 
 	cmd.Flags().StringVarP(&path, "path", "p", "", "指定api文件的路径")
@@ -21,7 +21,7 @@ func GenerateSourceApi() *cobra.Command {
 	return cmd
 }
 
-func GenSourceApi(cmd *cobra.Command, args []string) (err error) {
+func GenApi(cmd *cobra.Command, args []string) (err error) {
 
 	return
 }

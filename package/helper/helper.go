@@ -1,13 +1,16 @@
 package helper
 
 import (
-	"errors"
+	"bufio"
 	"fmt"
+	"os"
 	"reflect"
+	"strings"
 	"time"
+	"unicode"
 )
 
-// Empty 类似于 PHP 的 empty() 函数
+// Empty Whether the detection value exists.
 func Empty(val interface{}) bool {
 	if val == nil {
 		return true
@@ -32,35 +35,71 @@ func Empty(val interface{}) bool {
 	return reflect.DeepEqual(val, reflect.Zero(v.Type()).Interface())
 }
 
-// MicrosecondsStr 将时间转换为毫秒字符串
+// MicrosecondsStr Converts time to a string of milliseconds.
 func MicrosecondsStr(elapsed time.Duration) string {
 	return fmt.Sprintf("%.3fms", float64(elapsed.Nanoseconds())/1e6)
 }
 
-// AssignStruct 将 src 的值赋值给 dst，src和dst必须是指针类型
-func AssignStruct(dst, src interface{}) error {
-	dstVal := reflect.ValueOf(dst)
-	srcVal := reflect.ValueOf(src)
+func CamelCase(input string) string {
+	var output []rune
+	toUpper := true
 
-	if dstVal.Kind() != reflect.Ptr || dstVal.Elem().Kind() != reflect.Struct {
-		return errors.New("dst must be a pointer to a struct")
-	}
-
-	if srcVal.Kind() != reflect.Ptr || srcVal.Elem().Kind() != reflect.Struct {
-		return errors.New("src must be a pointer to a struct")
-	}
-
-	dstVal = dstVal.Elem()
-	srcVal = srcVal.Elem()
-
-	for i := 0; i < dstVal.NumField(); i++ {
-		fieldName := dstVal.Type().Field(i).Name
-		srcFieldVal := srcVal.FieldByName(fieldName)
-		if srcFieldVal.IsValid() &&
-			!reflect.DeepEqual(srcFieldVal.Interface(), reflect.Zero(srcFieldVal.Type()).Interface()) {
-			dstVal.Field(i).Set(srcFieldVal)
+	for _, r := range input {
+		if r == '_' {
+			toUpper = true
+			continue
+		}
+		if toUpper {
+			output = append(output, unicode.ToUpper(r))
+			toUpper = false
+		} else {
+			output = append(output, unicode.ToLower(r))
 		}
 	}
 
-	return nil
+	return string(output)
+}
+
+// CreateDirIfNotExist Create dir if not existed.
+func CreateDirIfNotExist(path string) (err error) {
+	if _, err = os.Stat(path); os.IsNotExist(err) {
+		err = os.MkdirAll(path, os.ModePerm)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// ReadLines Reads file contents into string slices.
+func ReadLines(filePath string) ([]string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	return lines, scanner.Err()
+}
+
+// WriteLines Write the modified content back to the file.
+func WriteLines(filePath string, lines []string) error {
+	content := strings.Join(lines, "\n")
+	return os.WriteFile(filePath, []byte(content), os.ModePerm)
+}
+
+// InsertOffset Insert the invoke call at the specified location.
+func InsertOffset(lines []string, newMiddleware, offset string) []string {
+	for i, line := range lines {
+		if strings.Contains(line, offset) {
+			lines[i] = newMiddleware + "\n" + line
+			break
+		}
+	}
+	return lines
 }

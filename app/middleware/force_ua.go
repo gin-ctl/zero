@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ForceUA 中间件，强制请求头部必须附带 User-Agent
+// ForceUA Force the request header to include a User-Agent.
 func ForceUA() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if c.Request.UserAgent() == "" {
