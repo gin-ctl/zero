@@ -32,7 +32,26 @@ func RegisterDemoAPI(r *gin.Engine) {
 			pay := o.Group("pay")
 			{
 				pay.POST("create", orderLogic.Create)
+				pay.GET("info/select")
 			}
+
+			son := pay.Group("son")
+			{
+				son.POST("create", orderLogic.Create)
+			}
+		}
+	}
+
+	v2 := r.Group("v2")
+	{
+		u := v2.Group("user")
+		{
+			userLogic := user.NewUserLogic()
+			u.GET("", userLogic.Index)
+			u.GET(":id", userLogic.Show)
+			u.POST("", userLogic.Create)
+			u.PUT(":id", userLogic.Update)
+			u.DELETE(":id", userLogic.Destroy)
 		}
 	}
 
