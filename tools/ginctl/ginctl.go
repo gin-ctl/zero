@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/gin-ctl/zero/tools/ginctl/api"
+	"github.com/gin-ctl/zero/tools/ginctl/apply"
+	"github.com/gin-ctl/zero/tools/ginctl/grpc"
 	"github.com/gin-ctl/zero/tools/ginctl/middleware"
 	"github.com/gin-ctl/zero/tools/ginctl/model"
 	"github.com/gin-ctl/zero/tools/ginctl/route"
@@ -18,10 +19,11 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
+		apply.GenerateHttpApply(),
+		grpc.GenerateGrpcApply(),
 		model.GenerateModelStruct(),
 		middleware.GenerateMiddleware(),
 		route.GenerateRoute(),
-		api.GenerateApi(),
 	)
 
 	// Execute command.
