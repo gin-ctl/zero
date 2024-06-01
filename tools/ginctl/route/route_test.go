@@ -2,6 +2,7 @@ package route
 
 import (
 	"fmt"
+	"github.com/gin-ctl/zero/package/helper"
 	"strings"
 	"testing"
 )
@@ -22,4 +23,15 @@ func TestParseRoute(t *testing.T) {
 	for _, line := range result {
 		fmt.Println(line)
 	}
+}
+
+func TestLines(t *testing.T) {
+	routePath := "/Users/qinchaozheng/.g/zero/bootstrap/route.go"
+	imports := fmt.Sprintf("\t\"github.com/gin-ctl/zero/app/http/%s/route\"", "demo")
+	lines, er := helper.ReadLines(routePath)
+	if er != nil {
+		t.Error(er)
+	}
+	isExisted := helper.CheckLineIsExisted(lines, imports)
+	t.Log(isExisted)
 }

@@ -85,26 +85,30 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 			console.Error(er.Error())
 			return
 		}
-		modifiedLines := helper.InsertOffset(
-			lines, insert, "// {{.ApiRoute}}")
-		err = helper.WriteLines(routePath, modifiedLines)
-		if err != nil {
-			console.Error(err.Error())
-			return
-		}
+		if !helper.CheckLineIsExisted(lines, insert) {
+			modifiedLines := helper.InsertOffset(
+				lines, insert, "// {{.ApiRoute}}")
+			err = helper.WriteLines(routePath, modifiedLines)
+			if err != nil {
+				console.Error(err.Error())
+				return
+			}
 
-		imports := fmt.Sprintf("\t\"github.com/gin-ctl/zero/app/http/%s/route\"", apply)
-		lines, er = helper.ReadLines(routePath)
-		if er != nil {
-			console.Error(er.Error())
-			return
-		}
-		modifiedLines = helper.InsertOffset(
-			lines, imports, "// {{.Import}}")
-		err = helper.WriteLines(routePath, modifiedLines)
-		if err != nil {
-			console.Error(err.Error())
-			return
+			imports := fmt.Sprintf("\t\"github.com/gin-ctl/zero/app/http/%s/route\"", apply)
+			lines, er = helper.ReadLines(routePath)
+			if er != nil {
+				console.Error(er.Error())
+				return
+			}
+			if !helper.CheckLineIsExisted(lines, imports) {
+				modifiedLines = helper.InsertOffset(
+					lines, imports, "// {{.Import}}")
+				err = helper.WriteLines(routePath, modifiedLines)
+				if err != nil {
+					console.Error(err.Error())
+					return
+				}
+			}
 		}
 	}
 	console.Success("Done.")

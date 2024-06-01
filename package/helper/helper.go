@@ -93,11 +93,21 @@ func WriteLines(filePath string, lines []string) error {
 	return os.WriteFile(filePath, []byte(content), os.ModePerm)
 }
 
+// CheckLineIsExisted Check str is existed.
+func CheckLineIsExisted(lines []string, new string) bool {
+	for _, line := range lines {
+		if strings.Contains(line, new) {
+			return true
+		}
+	}
+	return false
+}
+
 // InsertOffset Insert the invoke call at the specified location.
-func InsertOffset(lines []string, newMiddleware, offset string) []string {
+func InsertOffset(lines []string, new, offset string) []string {
 	for i, line := range lines {
 		if strings.Contains(line, offset) {
-			lines[i] = newMiddleware + "\n" + line
+			lines[i] = new + "\n" + line
 			break
 		}
 	}
