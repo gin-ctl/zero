@@ -2,6 +2,7 @@ package route
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -13,5 +14,12 @@ func TestParseRoute(t *testing.T) {
 		return
 	}
 
-	printRoutes(groups)
+	var result []string
+	printRoutes("/", groups, &result)
+
+	fmt.Printf("| %-42s | %-6s | %-17s |\n", "Path", "Method", "Handler")
+	fmt.Println(strings.Repeat("-", 68))
+	for _, line := range result {
+		fmt.Println(line)
+	}
 }

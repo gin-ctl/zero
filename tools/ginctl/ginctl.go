@@ -4,6 +4,7 @@ import (
 	"github.com/gin-ctl/zero/tools/ginctl/api"
 	"github.com/gin-ctl/zero/tools/ginctl/middleware"
 	"github.com/gin-ctl/zero/tools/ginctl/model"
+	"github.com/gin-ctl/zero/tools/ginctl/route"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +18,9 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		middleware.GenerateMiddleware(),
 		model.GenerateModelStruct(),
+		middleware.GenerateMiddleware(),
+		route.GenerateRoute(),
 		api.GenerateApi(),
 	)
 

@@ -2,10 +2,17 @@ package route
 
 import (
 	"github.com/gin-ctl/zero/app/http/demo/logic/user"
+	"github.com/gin-ctl/zero/app/http/demo/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterDemoAPI(r *gin.Engine) {
+
+	// middlewares
+	r.Use(
+		// {{.Middleware}}
+		middleware.Auth(),
+	)
 
 	v1 := r.Group("v1")
 	{

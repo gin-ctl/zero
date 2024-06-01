@@ -20,68 +20,47 @@ const (
 
 // Route represents a single route with method, path, and handler
 type Route struct {
-	Method  string
 	Path    string
+	Method  string
 	Handler string
 }
 
 // Group represents a group of routes
 type Group struct {
 	Path   string
+	Groups []Group
 	Routes []Route
 }
 
 // parseRoutes parses the routes from a file's AST
 func parseRoutes(node *ast.File) []Group {
 	var groups []Group
-	var currentPath []string
 
 	ast.Inspect(node, func(n ast.Node) bool {
 		switch x := n.(type) {
 		case *ast.CallExpr:
 			if fun, ok := x.Fun.(*ast.SelectorExpr); ok {
-				if fun.Sel.Name == GROUP {
-					groupPath := getStringArg(x)
-					currentPath = append(currentPath, groupPath)
-				} else if isHTTPMethod(fun.Sel.Name) {
+				group := Group{}
+				switch {
+				case fun.Sel.Name == GROUP:
+					group.Path = getStringArg(x)
+				case isHTTPMethod(fun.Sel.Name):
 					method := fun.Sel.Name
 					path := getStringArg(x)
 					handler := getHandler(x)
-					fullPath := buildFullPath(currentPath, path)
-					groups = addRoute(groups, fullPath, method, handler)
+					group.Routes = append(group.Routes, Route{
+						Path:    path,
+						Method:  method,
+						Handler: handler,
+					})
 				}
+				groups = append(groups, group)
 			}
-			//case *ast.BlockStmt:
-			//	if len(currentPath) > 0 {
-			//		currentPath = currentPath[:len(currentPath)-1]
-			//	}
 		}
 		return true
 	})
 
 	return groups
-}
-
-// addRoute adds a route to the appropriate group
-func addRoute(groups []Group, fullPath, method, handler string) []Group {
-	found := false
-	for i, group := range groups {
-		if group.Path == currentPathPrefix(fullPath) {
-			groups[i].Routes = append(groups[i].Routes, Route{Method: method, Path: fullPath, Handler: handler})
-			found = true
-			break
-		}
-	}
-	if !found {
-		groups = append(groups, Group{Path: currentPathPrefix(fullPath), Routes: []Route{{Method: method, Path: fullPath, Handler: handler}}})
-	}
-	return groups
-}
-
-// buildFullPath constructs the full path based on the group stack
-func buildFullPath(currentPath []string, path string) string {
-	fullPath := "/" + strings.Join(append(currentPath, strings.TrimPrefix(path, "/")), "/")
-	return strings.TrimSuffix(fullPath, "/")
 }
 
 // getStringArg gets the first string argument from a call expression
@@ -134,7 +113,9 @@ func parseFile(filename string, wg *sync.WaitGroup, ch chan<- []Group) {
 // scanDir scans a directory for Go files and parses them concurrently
 func scanDir(dir string) ([]Group, error) {
 	var wg sync.WaitGroup
-	ch := make(chan []Group)
+	ch := make(chan []Group, 10)
+
+	var rootGroups []Group
 
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -157,66 +138,24 @@ func scanDir(dir string) ([]Group, error) {
 		close(ch)
 	}()
 
-	var groups []Group
-	for groupList := range ch {
-		groups = append(groups, groupList...)
+	for group := range ch {
+		rootGroups = append(rootGroups, group...)
 	}
 
-	return groups, nil
+	return rootGroups, nil
 }
 
-// findMaxLengths finds the maximum length of each column for formatting purposes
-func findMaxLengths(groups []Group) (int, int, int) {
-	maxPathLength := len(Path)
-	maxMethodLength := len(Method)
-	maxHandlerLength := len(Handler)
-
+// printRoutes
+func printRoutes(prefix string, groups []Group, result *[]string) {
 	for _, group := range groups {
+		newPrefix := prefix + group.Path
 		for _, route := range group.Routes {
-			pathLength := len(route.Path)
-			methodLength := len(route.Method)
-			handlerLength := len(route.Handler)
-
-			if pathLength > maxPathLength {
-				maxPathLength = pathLength
+			path := newPrefix
+			if route.Path != "" {
+				path += "/" + route.Path
 			}
-			if methodLength > maxMethodLength {
-				maxMethodLength = methodLength
-			}
-			if handlerLength > maxHandlerLength {
-				maxHandlerLength = handlerLength
-			}
+			*result = append(*result, fmt.Sprintf("| %-42s | %-6s | %-17s |", path, route.Method, route.Handler))
 		}
+		printRoutes(newPrefix+"/", group.Groups, result)
 	}
-
-	return maxPathLength, maxMethodLength, maxHandlerLength
-}
-
-// printRoutes prints the parsed routes in a tabular format
-func printRoutes(groups []Group) {
-	maxPathLength, maxMethodLength, maxHandlerLength := findMaxLengths(groups)
-
-	fmt.Printf("| %-*s | %-*s | %-*s |\n", maxPathLength, Path, maxMethodLength, Method, maxHandlerLength, Handler)
-	fmt.Printf("|-%s-|-%s-|-%s-|\n",
-		strings.Repeat("-", maxPathLength),
-		strings.Repeat("-", maxMethodLength),
-		strings.Repeat("-", maxHandlerLength))
-
-	for _, group := range groups {
-		for _, route := range group.Routes {
-			fmt.Printf("| %-*s | %-*s | %-*s |\n",
-				maxPathLength, route.Path,
-				maxMethodLength, route.Method,
-				maxHandlerLength, route.Handler)
-		}
-	}
-}
-
-// currentPathPrefix returns the path prefix of the full path
-func currentPathPrefix(fullPath string) string {
-	parts := strings.Split(fullPath, "/")
-	if len(parts) > 2 {
-		return "/" + parts[1]
-	}
-	return fullPath
 }
