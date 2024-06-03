@@ -31,14 +31,14 @@ func (r RequestType[T]) Data() T {
 }
 
 // Parse is a function that parses request parameters into the provided struct
-func Parse[T any](c *gin.Context, obj T) (RequestType[T], error) {
+func Parse[T any](c *gin.Context, obj *T) (err error) {
 
 	// Handle the JSON binding first
-	if err := c.ShouldBind(&obj); err != nil {
-		return RequestType[T]{}, err
+	if err = c.ShouldBind(obj); err != nil {
+		return
 	}
 
-	val := reflect.ValueOf(&obj).Elem()
+	val := reflect.ValueOf(obj).Elem()
 	typ := val.Type()
 
 	for i := 0; i < val.NumField(); i++ {
@@ -64,7 +64,7 @@ func Parse[T any](c *gin.Context, obj T) (RequestType[T], error) {
 		}
 	}
 
-	return NewRequestType(obj), nil
+	return
 }
 
 // Helper function to parse string fields
