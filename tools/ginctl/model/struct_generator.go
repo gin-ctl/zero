@@ -79,26 +79,27 @@ func GenerateStruct(tableName string, columns []*Column) string {
 			gormTag += "\""
 		}
 
-		validateTag := "omitempty"
-		if col.IsNullAble == "NO" {
-			validateTag = "required"
-		}
-		switch goType {
-		case "string":
-			if col.CharacterMaximumLength != nil {
-				validateTag = fmt.Sprintf("%s,max=%d", validateTag, *col.CharacterMaximumLength)
-			}
-		case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
-			validateTag = fmt.Sprintf("%s,numeric", validateTag)
-		case "time.Time":
-			validateTag = "omitempty,datetime"
-		}
+		//validateTag := "omitempty"
+		//if col.IsNullAble == "NO" {
+		//	validateTag = "required"
+		//}
+		//switch goType {
+		//case "string":
+		//	if col.CharacterMaximumLength != nil {
+		//		validateTag = fmt.Sprintf("%s,max=%d", validateTag, *col.CharacterMaximumLength)
+		//	}
+		//case "int", "int8", "int16", "int32", "int64", "uint", "uint8", "uint16", "uint32", "uint64", "float32", "float64":
+		//	validateTag = fmt.Sprintf("%s,numeric", validateTag)
+		//case "time.Time":
+		//	validateTag = "omitempty,datetime"
+		//}
+		//
+		//if validateTag != "" {
+		//	validateTag = fmt.Sprintf("validate:\"%s\"", validateTag)
+		//}
 
-		if validateTag != "" {
-			validateTag = fmt.Sprintf("validate:\"%s\"", validateTag)
-		}
-
-		builder.WriteString(fmt.Sprintf("    %s %s `%s %s %s`\n", fieldName, goType, jsonTag, gormTag, validateTag))
+		//builder.WriteString(fmt.Sprintf("    %s %s `%s %s %s`\n", fieldName, goType, jsonTag, gormTag, validateTag))
+		builder.WriteString(fmt.Sprintf("    %s %s `%s %s`\n", fieldName, goType, jsonTag, gormTag))
 	}
 	builder.WriteString("}\n")
 	return builder.String()

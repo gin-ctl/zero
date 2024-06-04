@@ -108,7 +108,7 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 				if strings.Contains(table.Struct, "json.RawMessage") {
 					pkg += "\"encoding/json\"\n"
 				}
-				if strings.Contains(table.Struct, "") {
+				if strings.Contains(table.Struct, "time.Time") {
 					pkg += "\t\"github.com/gin-ctl/zero/package/time\""
 				}
 				if pkg != "" {

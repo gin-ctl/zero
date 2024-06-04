@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/gin-ctl/zero/package/http"
+	"github.com/gin-ctl/zero/package/validator"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +14,6 @@ type Request struct {
 	FullName  string `json:"name" validate:"required"`
 	FolderId  uint64 `json:"folder_id"`
 	IsDeleted bool   `json:"is_deleted"`
-	Dive      Dive   `json:"dive"`
 }
 
 func (r *Request) ParseAndCheckParams(c *gin.Context) (err error) {
@@ -21,7 +21,10 @@ func (r *Request) ParseAndCheckParams(c *gin.Context) (err error) {
 	if err != nil {
 		return
 	}
-	// todo 业务校验
+	if err = validator.ValidateStructWithOutCtx(r); err != nil {
+		return
+	}
+	// TODO: add your logic check.
 
 	return
 }
@@ -35,22 +38,7 @@ func (r *Response) ParseAndCheckParams(c *gin.Context) (err error) {
 	if err != nil {
 		return
 	}
-	// todo 业务校验
+	// TODO: add your logic check.
 
 	return
-}
-
-type Dive struct {
-	UserInfo Info `json:"user_info"`
-}
-
-type Info struct {
-	Name  string `json:"name"`
-	Phone uint   `json:"phone"`
-	Fans  []Fans `json:"fans"`
-}
-
-type Fans struct {
-	Name  string `json:"name"`
-	Phone uint   `json:"phone"`
 }
