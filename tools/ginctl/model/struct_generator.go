@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-ctl/zero/bootstrap"
+	"github.com/gin-ctl/zero/package/database"
 	"github.com/gin-ctl/zero/package/get"
 	"github.com/gin-ctl/zero/package/helper"
 	"strings"
@@ -28,8 +28,8 @@ type Column struct {
 func GetTables(args string) (tables []*Table, err error) {
 	// get tables.
 	if args == `*` {
-		err = bootstrap.DB.Raw("SELECT table_name FROM information_schema.tables WHERE table_schema=?;",
-			get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
+		err = database.DB.Raw("SELECT table_name FROM information_schema.tables WHERE table_schema=?;",
+			get.String(fmt.Sprintf("db.%s.database", database.DB.Config.Name()))).
 			Scan(&tables).Error
 		if err == nil {
 			for i, table := range tables {
@@ -40,7 +40,7 @@ func GetTables(args string) (tables []*Table, err error) {
 	} else {
 		for _, name := range strings.Split(args, ",") {
 			// check table is existed.
-			exist := bootstrap.DB.Migrator().HasTable(name)
+			exist := database.DB.Migrator().HasTable(name)
 			if !exist {
 				err = errors.New(fmt.Sprintf("`%s` not found.", name))
 				return
@@ -57,8 +57,8 @@ func GetTables(args string) (tables []*Table, err error) {
 func GetColumn(tableName string) (columns []*Column, err error) {
 
 	// get table columns.
-	err = bootstrap.DB.Raw("SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,CHARACTER_MAXIMUM_LENGTH,EXTRA,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?;",
-		tableName, get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))).
+	err = database.DB.Raw("SELECT COLUMN_NAME,COLUMN_TYPE,IS_NULLABLE,CHARACTER_MAXIMUM_LENGTH,EXTRA,COLUMN_COMMENT FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = ? AND TABLE_SCHEMA = ?;",
+		tableName, get.String(fmt.Sprintf("db.%s.database", database.DB.Config.Name()))).
 		Scan(&columns).Error
 
 	return
@@ -72,6 +72,10 @@ func GenerateStruct(tableName string, columns []*Column) string {
 		goType := mapSQLTypeToGoType(col.Type)
 		jsonTag := fmt.Sprintf("json:\"%s\"", col.Name)
 		gormTag := fmt.Sprintf("gorm:\"column:%s", col.Name)
+		commitTag := ""
+		if col.Comment != "" {
+			commitTag = fmt.Sprintf("\t// %s", col.Comment)
+		}
 
 		if strings.ToLower(col.Extra) == "auto_increment" {
 			gormTag = fmt.Sprintf("%s;primaryKey;autoIncrement\"", gormTag)
@@ -99,7 +103,7 @@ func GenerateStruct(tableName string, columns []*Column) string {
 		//}
 
 		//builder.WriteString(fmt.Sprintf("    %s %s `%s %s %s`\n", fieldName, goType, jsonTag, gormTag, validateTag))
-		builder.WriteString(fmt.Sprintf("    %s %s `%s %s`\n", fieldName, goType, jsonTag, gormTag))
+		builder.WriteString(fmt.Sprintf("    %s %s `%s %s`%s \n", fieldName, goType, jsonTag, gormTag, commitTag))
 	}
 	builder.WriteString("}\n")
 	return builder.String()

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-ctl/zero/bootstrap"
 	"github.com/gin-ctl/zero/package/console"
+	"github.com/gin-ctl/zero/package/database"
 	"github.com/gin-ctl/zero/package/get"
 	"github.com/gin-ctl/zero/package/helper"
 	"github.com/spf13/cobra"
@@ -63,7 +64,7 @@ func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
 		return
 	}
 	// get sql database.
-	database := get.String(fmt.Sprintf("db.%s.database", bootstrap.DB.Config.Name()))
+	database := get.String(fmt.Sprintf("db.%s.database", database.DB.Config.Name()))
 	// get dir.
 	dir := fmt.Sprintf("%s/model/%s", pwd, database)
 	err = helper.CreateDirIfNotExist(dir)

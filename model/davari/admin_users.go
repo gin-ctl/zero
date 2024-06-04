@@ -5,11 +5,11 @@ import (
 )
 
 type AdminUsers struct {
-    Id int32 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
-    Username string `json:"username" gorm:"column:username"`
-    Password string `json:"password" gorm:"column:password"`
-    CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
-    UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"`
+    Id int32 `json:"id" gorm:"column:id;primaryKey;autoIncrement"` 
+    Username string `json:"username" gorm:"column:username"`	// 用户名称 
+    Password string `json:"password" gorm:"column:password"`	// 密码 
+    CreatedAt time.Time `json:"created_at" gorm:"column:created_at"` 
+    UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"` 
 }
 
 

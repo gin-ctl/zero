@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"regexp"
 	"strings"
 )
 
@@ -15,6 +16,11 @@ var (
 // init 创建一个验证器实例 初始化翻译器
 func init() {
 	validate = validator.New()
+	// Register custom validators
+	err := validate.RegisterValidation("phone", validatePhoneNumber)
+	if err != nil {
+		return
+	}
 }
 
 // ValidateStruct 验证结构体
@@ -46,4 +52,14 @@ func ValidateStructWithOutCtx(s interface{}) (err error) {
 		}
 	}
 	return
+}
+
+func validatePhoneNumber(fl validator.FieldLevel) bool {
+	phoneNumber := fl.Field().String()
+
+	// Regular expression matching mobile phone number in Chinese Mainland.
+	regex := `^1[3-9]\d{9}$`
+	re := regexp.MustCompile(regex)
+
+	return re.MatchString(phoneNumber)
 }

@@ -5,10 +5,10 @@ import (
 )
 
 type Roles struct {
-    Id uint32 `json:"id" gorm:"column:id;primaryKey;autoIncrement"`
-    Name string `json:"name" gorm:"column:name"`
-    CreatedAt time.Time `json:"created_at" gorm:"column:created_at"`
-    UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"`
+    Id uint32 `json:"id" gorm:"column:id;primaryKey;autoIncrement"` 
+    Name string `json:"name" gorm:"column:name"`	// 角色名称 
+    CreatedAt time.Time `json:"created_at" gorm:"column:created_at"` 
+    UpdatedAt time.Time `json:"updated_at" gorm:"column:updated_at"` 
 }
 
 

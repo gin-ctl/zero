@@ -3,12 +3,25 @@ package helper
 import (
 	"bufio"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 	"os"
 	"reflect"
 	"strings"
 	"time"
 	"unicode"
 )
+
+// BcryptHash Encrypt passwords using bcrypt.
+func BcryptHash(password string) (pw string, err error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	return string(bytes), err
+}
+
+// BcryptCheck Compare the plaintext password with the database hash.
+func BcryptCheck(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
 
 // Empty Whether the detection value exists.
 func Empty(val interface{}) bool {
