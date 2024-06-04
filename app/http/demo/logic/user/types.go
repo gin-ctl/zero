@@ -114,7 +114,7 @@ func checkUsername(r *User, isUpdate bool) (err error) {
 	user := model.NewUser()
 	db := database.DB.Model(user).Where("username = ?", r.Username)
 	if isUpdate {
-		db = db.Where("id = ?", r.Id)
+		db = db.Where("id != ?", r.Id)
 	}
 	// 手机号唯一
 	if r.Phone != nil {
