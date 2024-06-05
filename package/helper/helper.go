@@ -126,3 +126,23 @@ func InsertOffset(lines []string, new, offset string) []string {
 	}
 	return lines
 }
+
+// AppendToFile appends the given content to the end of the specified file
+func AppendToFile(filePath string, content string) error {
+	// Read the existing content from the file
+	existingContent, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file: %w", err)
+	}
+
+	// Append the new content to the existing content
+	newContent := append(existingContent, content...)
+
+	// Write the new content back to the file
+	err = os.WriteFile(filePath, newContent, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to write to file: %w", err)
+	}
+
+	return nil
+}

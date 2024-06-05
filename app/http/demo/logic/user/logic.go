@@ -16,6 +16,7 @@ func NewUserLogic() *Logic {
 	return &Logic{}
 }
 
+// Index Query list.
 func (u *Logic) Index(c *gin.Context) {
 	params, err := logic.ParseAndCheckParams[Index](c)
 	if err != nil {
@@ -47,6 +48,7 @@ func (u *Logic) Index(c *gin.Context) {
 	})
 }
 
+// Show Get record details.
 func (u *Logic) Show(c *gin.Context) {
 	params, err := logic.ParseAndCheckParams[Info](c)
 	if err != nil {
@@ -56,7 +58,7 @@ func (u *Logic) Show(c *gin.Context) {
 	http.SuccessWithData(c, params.Data().One)
 }
 
-// Create one row.
+// Create a record.
 func (u *Logic) Create(c *gin.Context) {
 	params, err := logic.ParseAndCheckParams[Create](c)
 	if err != nil {
@@ -82,6 +84,7 @@ func (u *Logic) Create(c *gin.Context) {
 	http.Success(c)
 }
 
+// Update a record.
 func (u *Logic) Update(c *gin.Context) {
 	params, err := logic.ParseAndCheckParams[Update](c)
 	if err != nil {
@@ -101,6 +104,7 @@ func (u *Logic) Update(c *gin.Context) {
 	http.Success(c)
 }
 
+// Destroy Permanently delete a record.
 func (u *Logic) Destroy(c *gin.Context) {
 	params, err := logic.ParseAndCheckParams[Info](c)
 	if err != nil {
