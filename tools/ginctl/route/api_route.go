@@ -1,8 +1,8 @@
 package route
 
 import (
+	"github.com/gin-ctl/zero/app/http/demo/logic"
 	"github.com/gin-ctl/zero/app/http/demo/logic/order"
-	"github.com/gin-ctl/zero/app/http/demo/logic/user"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,7 +13,7 @@ func RegisterDemoAPI(r *gin.Engine) {
 		// 用户
 		u := v1.Group("user")
 		{
-			userLogic := user.NewUserLogic()
+			userLogic := logic.NewUserLogic()
 			u.GET("", userLogic.Index)
 			u.GET(":id", userLogic.Show)
 			u.POST("", userLogic.Create)
@@ -46,7 +46,7 @@ func RegisterDemoAPI(r *gin.Engine) {
 	{
 		u := v2.Group("user")
 		{
-			userLogic := user.NewUserLogic()
+			userLogic := logic.NewUserLogic()
 			u.GET("", userLogic.Index)
 			u.GET(":id", userLogic.Show)
 			u.POST("", userLogic.Create)

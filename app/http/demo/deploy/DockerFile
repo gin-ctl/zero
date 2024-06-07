@@ -18,7 +18,7 @@ ENV TZ Asia/Shanghai
 RUN apk add tzdata
 
 
-COPY --from=go_builder /app/demo /demo
+COPY --from=go_builder /app/http/demo /demo
 COPY --from=go_builder /app/config/env.yaml /config/env.yaml
 
 

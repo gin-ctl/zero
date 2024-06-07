@@ -1,0 +1,29 @@
+package {{.LowerModel}}
+
+import (
+	"github.com/gin-ctl/zero/package/http"
+	"github.com/gin-ctl/zero/package/validator"
+	"github.com/gin-gonic/gin"
+)
+
+// Index demo.
+//type Index struct {
+//	Page     uint32  `form:"page" validate:"numeric,min=1"`
+//	Size     uint32  `form:"size" validate:"numeric,min=1,max=100"`
+//	Keywords *string `form:"keywords" validate:"omitempty"`
+//}
+//
+//func (r *Index) ParseAndCheckParams(c *gin.Context) (err error) {
+//	err = http.Parse(c, r)
+//	if err != nil {
+//		return
+//	}
+//	if err = validator.ValidateStructWithOutCtx(r); err != nil {
+//		return
+//	}
+//	return
+//}
+
+{{.ActionStruct}}
+
+{{.ActionFunc}}

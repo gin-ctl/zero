@@ -12,7 +12,7 @@ import (
 
 type Logic struct{}
 
-func NewUserLogic() *Logic {
+func NewLogic() *Logic {
 	return &Logic{}
 }
 

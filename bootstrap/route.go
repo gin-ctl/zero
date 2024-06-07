@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"github.com/gin-ctl/zero/app/http/demo/route"
+
 	// {{.Import}}
 	"github.com/gin-ctl/zero/app/middleware"
 	"github.com/gin-ctl/zero/package/http"

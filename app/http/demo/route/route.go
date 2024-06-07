@@ -14,12 +14,13 @@ func RegisterDemoAPI(r *gin.Engine) {
 		middleware.Auth(),
 	)
 
+	// route
 	v1 := r.Group("v1")
 	{
-		// 用户
+		// user
 		u := v1.Group("user")
 		{
-			userLogic := user.NewUserLogic()
+			userLogic := user.NewLogic()
 			u.GET("", userLogic.Index)
 			u.GET(":id", userLogic.Show)
 			u.POST("", userLogic.Create)

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"io"
 	"os"
 	"reflect"
 	"strings"
@@ -145,4 +146,19 @@ func AppendToFile(filePath string, content string) error {
 	}
 
 	return nil
+}
+
+// GetFileContent get file content return string.
+func GetFileContent(filePath string) (content string, err error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return
+	}
+	content = string(data)
+	return
 }
