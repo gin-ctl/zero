@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-ctl/zero/tools/ginctl/api"
 	"github.com/gin-ctl/zero/tools/ginctl/apply"
 	"github.com/gin-ctl/zero/tools/ginctl/grpc"
 	"github.com/gin-ctl/zero/tools/ginctl/middleware"
@@ -19,6 +20,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
+		api.GenerateApi(),
 		apply.GenerateHttpApply(),
 		grpc.GenerateGrpcApply(),
 		model.GenerateModelStruct(),

@@ -31,13 +31,13 @@ func GenApi(_ *cobra.Command, _ []string) (err error) {
 	var wg sync.WaitGroup
 
 	wg.Add(2)
-	// 生成logic
+	// logic
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 
 	}(&wg)
 
-	// 生成types
+	// types
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 
