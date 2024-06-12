@@ -12,8 +12,30 @@ type Logic struct {
 	Content string
 }
 
-// GenBasicLogic generate apply basic logic.
-func GenBasicLogic(filePath string) (err error) {
+type StubCode uint
+
+const (
+	FromStubBasic StubCode = iota + 1
+	FromStubImport
+	FromStubLogicFunc
+	FromStubTypes
+	FromStubTypeStruct
+	FromStubTypeFunc
+	ToLogic
+)
+
+var StubMap = map[StubCode]string{
+	FromStubBasic:      "%s/api/stub/basic_logic.stub",
+	FromStubImport:     "%s/api/stub/logic_import.stub",
+	FromStubLogicFunc:  "%s/api/stub/logic_func.stub",
+	FromStubTypes:      "%s/api/stub/types.stub",
+	FromStubTypeStruct: "%s/api/stub/type_struct.stub",
+	FromStubTypeFunc:   "%s/api/stub/type_func.stub",
+	ToLogic:            "%s/api/stub/logic.stub",
+}
+
+// GenLogic generate apply logic.
+func GenLogic(filePath string, from, to StubCode) (err error) {
 	dir := filepath.Dir(filePath)
 
 	err = helper.CreateDirIfNotExist(dir)
@@ -26,7 +48,7 @@ func GenBasicLogic(filePath string) (err error) {
 		return
 	}
 
-	tmp, err := template.ParseFiles(fmt.Sprintf("%s/api/stub/basic_logic.stub", pwd))
+	tmp, err := template.ParseFiles(fmt.Sprintf(StubMap[from], pwd))
 	if err != nil {
 		return
 	}
@@ -38,7 +60,7 @@ func GenBasicLogic(filePath string) (err error) {
 	defer outFile.Close()
 
 	var logic Logic
-	logic.Content, err = helper.GetFileContent(fmt.Sprintf("%s/api/stub/logic.stub", pwd))
+	logic.Content, err = helper.GetFileContent(fmt.Sprintf(StubMap[to], pwd))
 	if err != nil {
 		return
 	}

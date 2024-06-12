@@ -25,6 +25,6 @@ func GenerateApi() *cobra.Command {
 }
 
 func GenApi(_ *cobra.Command, _ []string) (err error) {
-	err = GenBasicLogic("")
+
 	return
 }
