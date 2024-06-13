@@ -1,4 +1,4 @@
-func (r *{{.Action}}) ParseAndCheckParams(c *gin.Context) (err error) {
+func (r *{{.Opt}}) ParseAndCheckParams(c *gin.Context) (err error) {
 	err = http.Parse(c, r)
 	if err != nil {
 		return

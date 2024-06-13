@@ -1,5 +1,0 @@
-type Logic struct{}
-
-func New{{.Model}}Logic() *Logic {
-	return &Logic{}
-}

@@ -5,3 +5,9 @@ import (
 	"github.com/gin-ctl/zero/package/http"
 	"github.com/gin-gonic/gin"
 )
+
+type Logic struct{}
+
+func New{{.}}Logic() *Logic {
+	return &Logic{}
+}

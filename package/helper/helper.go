@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 )
 
 // BcryptHash Encrypt passwords using bcrypt.
@@ -74,6 +75,17 @@ func CamelCase(input string) string {
 	return string(output)
 }
 
+// Capitalize Capital case
+func Capitalize(s string) string {
+	if s == "" {
+		return ""
+	}
+	// read first rune
+	r, size := utf8.DecodeRuneInString(s)
+	// Convert the first rune to uppercase and concatenate the rest
+	return string(unicode.ToUpper(r)) + s[size:]
+}
+
 // CreateDirIfNotExist Create dir if not existed.
 func CreateDirIfNotExist(path string) (err error) {
 	if _, err = os.Stat(path); os.IsNotExist(err) {
@@ -83,6 +95,12 @@ func CreateDirIfNotExist(path string) (err error) {
 		}
 	}
 	return
+}
+
+// PathExists checks if the specified path (file or directory) exists and returns a boolean value.
+func PathExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }
 
 // ReadLines Reads file contents into string slices.
