@@ -18,18 +18,15 @@ type Template struct {
 	Route string
 }
 
-func GenerateRoute() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "route",
-		Short: "make route",
-		Long: `
-		`,
-		RunE: GenRoute,
-	}
+var Cmd = &cobra.Command{
+	Use:   "route",
+	Short: "make route",
+	Long:  ``,
+	RunE:  GenRoute,
+}
 
-	cmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
-
-	return cmd
+func init() {
+	Cmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
 }
 
 func GenRoute(_ *cobra.Command, _ []string) (err error) {

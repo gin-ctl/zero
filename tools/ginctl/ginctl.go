@@ -21,11 +21,11 @@ func main() {
 
 	rootCmd.AddCommand(
 		api.Cmd,
-		apply.GenerateHttpApply(),
-		grpc.GenerateGrpcApply(),
-		model.GenerateModelStruct(),
-		middleware.GenerateMiddleware(),
-		route.GenerateRoute(),
+		apply.Cmd,
+		grpc.Cmd,
+		model.Cmd,
+		middleware.Cmd,
+		route.Cmd,
 	)
 
 	// Execute command.

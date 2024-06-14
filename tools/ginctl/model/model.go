@@ -18,7 +18,19 @@ var (
 	tableName string
 )
 
+var Cmd = &cobra.Command{
+	Use:   "model",
+	Short: "make model",
+	Long: `Generates a mapping structure for a table based on the database table name.
+Enter --table * or -t * to generate all table mapping structures. 
+Multiple tables are separated by ",".
+		`,
+	RunE: GenModelStruct,
+}
+
 func init() {
+	Cmd.Flags().StringVarP(&tableName, "table", "t", "", "Specify table name")
+
 	pwd, err := os.Getwd()
 	if err != nil {
 		console.Error(err.Error())
@@ -33,22 +45,6 @@ func init() {
 	// Start basic services.
 	bootstrap.SetupLogger()
 	bootstrap.SetupDB()
-}
-
-func GenerateModelStruct() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "model",
-		Short: "make model",
-		Long: `Generates a mapping structure for a table based on the database table name.
-Enter --table * or -t * to generate all table mapping structures. 
-Multiple tables are separated by ",".
-		`,
-		RunE: GenModelStruct,
-	}
-
-	cmd.Flags().StringVarP(&tableName, "table", "t", "", "Specify table name")
-
-	return cmd
 }
 
 func GenModelStruct(_ *cobra.Command, _ []string) (err error) {
