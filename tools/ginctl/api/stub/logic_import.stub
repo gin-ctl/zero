@@ -8,6 +8,6 @@ import (
 
 type Logic struct{}
 
-func New{{.}}Logic() *Logic {
+func NewLogic() *Logic {
 	return &Logic{}
 }

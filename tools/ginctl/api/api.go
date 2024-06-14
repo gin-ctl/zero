@@ -11,38 +11,27 @@ var (
 	apply     string
 	model     string
 	operation string
+	desc      string
 	curd      bool
 )
 
-func GenerateApi() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "api",
-		Short: "make api",
-		Long:  ``,
-		RunE:  GenApi,
-	}
-
-	cmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
-	cmd.Flags().StringVarP(&model, "model", "m", "", "Specify model name")
-
-	cmd.AddCommand(apiCmd)
-	apiCmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
-	apiCmd.Flags().StringVarP(&model, "model", "m", "", "Specify model name")
-	apiCmd.Flags().StringVarP(&operation, "operation", "o", "", "Specify operation name")
-	apiCmd.Flags().BoolVarP(&curd, "curd", "c", false, "Specifies whether you need to generate add, delete, update and get operations for the module")
-
-	return cmd
+var Cmd = &cobra.Command{
+	Use:   "api",
+	Short: "make api",
+	Long: `Create a basic service for an application.
+example: api -a test,Generate the base business code for the test application.`,
+	RunE: GenApi,
 }
 
-func GenApi(cmd *cobra.Command, args []string) (err error) {
+func init() {
+	Cmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
+	Cmd.AddCommand(apiCmd)
+}
+
+func GenApi(_ *cobra.Command, _ []string) (err error) {
 
 	if apply == "" {
 		console.Error("invalid apply name.")
-		return
-	}
-
-	if model == "" {
-		console.Error("invalid model name.")
 		return
 	}
 
@@ -54,14 +43,5 @@ func GenApi(cmd *cobra.Command, args []string) (err error) {
 		return
 	}
 
-	// execute subcommand.
-	childCmd, _, err := cmd.Find(args)
-	if err != nil {
-		return err
-	}
-	if childCmd != nil && childCmd != cmd {
-		return childCmd.Execute()
-	}
-	console.Success("Done.")
 	return
 }

@@ -1,6 +1,6 @@
 // {{.Description}}
-func (l *Logic) {{.Action}}(c *gin.Context) {
-	params, err := logic.ParseAndCheckParams[{{.Action}}](c)
+func (l *Logic) {{.Opt}}(c *gin.Context) {
+	params, err := logic.ParseAndCheckParams[{{.Opt}}](c)
 	if err != nil {
 		http.Alert400(c, http.StatusBadRequest, err.Error())
 		return

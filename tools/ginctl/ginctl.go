@@ -20,7 +20,7 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		api.GenerateApi(),
+		api.Cmd,
 		apply.GenerateHttpApply(),
 		grpc.GenerateGrpcApply(),
 		model.GenerateModelStruct(),

@@ -20,7 +20,8 @@ type Body struct {
 }
 
 type Operation struct {
-	Opt string
+	Opt         string
+	Description string
 }
 
 type StubCode uint
@@ -30,19 +31,17 @@ const (
 	FromStubImport
 	FromStubLogicFunc
 	FromStubTypes
-	FromStubTypeStruct
 	FromStubTypeFunc
 	ToLogic
 )
 
 var StubMap = map[StubCode]string{
-	FromStubBasic:      "%s/tools/ginctl/api/stub/basic_logic.stub",
-	FromStubImport:     "%s/tools/ginctl/api/stub/logic_import.stub",
-	FromStubLogicFunc:  "%s/tools/ginctl/api/stub/logic_func.stub",
-	FromStubTypes:      "%s/tools/ginctl/api/stub/types.stub",
-	FromStubTypeStruct: "%s/tools/ginctl/api/stub/type_struct.stub",
-	FromStubTypeFunc:   "%s/tools/ginctl/api/stub/type_func.stub",
-	ToLogic:            "%s/tools/ginctl/api/stub/logic.stub",
+	FromStubBasic:     "%s/tools/ginctl/api/stub/basic_logic.stub",
+	FromStubImport:    "%s/tools/ginctl/api/stub/logic_import.stub",
+	FromStubLogicFunc: "%s/tools/ginctl/api/stub/logic_func.stub",
+	FromStubTypes:     "%s/tools/ginctl/api/stub/types.stub",
+	FromStubTypeFunc:  "%s/tools/ginctl/api/stub/type_func.stub",
+	ToLogic:           "%s/tools/ginctl/api/stub/logic.stub",
 }
 
 // GenLogic generate apply logic.
@@ -107,20 +106,56 @@ func GenLogic(filePath string, from, to StubCode, body *Body) (err error) {
 	return
 }
 
-func ExecuteContent(filePath string, body *Body) (err error) {
+func DoGenOperation(filePath, opt, desc string, code StubCode, errs chan error) {
+	opt = helper.Capitalize(opt)
 	pwd, err := os.Getwd()
 	if err != nil {
+		errs <- err
 		return
 	}
 
-	filePath = fmt.Sprintf("%s/%s", pwd, strings.TrimLeft(filePath, "/"))
+	from := fmt.Sprintf(StubMap[code], pwd)
+	content, err := helper.GetFileContent(from)
+	if err != nil {
+		errs <- err
+		return
+	}
+
+	// check operation is existed.
+	address := fmt.Sprintf("%s/%s", pwd, strings.TrimLeft(filePath, "/"))
+	source, err := helper.GetFileContent(address)
+	if err != nil {
+		errs <- err
+		return
+	}
+	if strings.Contains(source, opt) {
+		return
+	}
+
+	err = helper.AppendToFile(address, content)
+	if err != nil {
+		errs <- err
+		return
+	}
+
+	operate := &Operation{
+		Opt:         opt,
+		Description: fmt.Sprintf("%s %s", opt, desc),
+	}
+	err = ExecuteContent(address, operate)
+	if err != nil {
+		errs <- err
+	}
+}
+
+func ExecuteContent(filePath string, opt *Operation) (err error) {
 	tmp, err := template.ParseFiles(filePath)
 	if err != nil {
 		return
 	}
 
 	var output bytes.Buffer
-	err = tmp.Execute(&output, body)
+	err = tmp.Execute(&output, opt)
 	if err != nil {
 		return
 	}

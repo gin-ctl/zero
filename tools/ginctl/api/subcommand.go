@@ -8,25 +8,37 @@ import (
 	"sync"
 )
 
-var OptMap = []string{
-	"Index",
-	"Show",
-	"Create",
-	"Update",
-	"Destroy",
+type Files struct {
+	Code StubCode
+	Name string
+}
+
+type Opts struct {
+	Name string
+	Desc string
 }
 
 var apiCmd = &cobra.Command{
 	Use:   "opt",
 	Short: "make operation",
-	Long:  ``,
-	RunE:  GenOperation,
+	Long: `Example: api opt -a test -m user -c true CURD operation to create a resource. 
+Example: api opt -a test -m user -o ping to create a single operation method.`,
+	RunE: GenOperation,
 }
 
-func GenOperation(_ *cobra.Command, _ []string) (err error) {
+func init() {
+	apiCmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
+	apiCmd.Flags().StringVarP(&model, "model", "m", "", "Specify model name")
+	apiCmd.Flags().StringVarP(&operation, "operation", "o", "", "Specify operation name")
+	apiCmd.Flags().StringVarP(&desc, "desc", "d", "", "Specify operation description")
+	apiCmd.Flags().BoolVarP(&curd, "curd", "c", false, "Specifies whether you need to generate add, delete, update and get operations for the module")
+}
+
+func GenOperation(_ *cobra.Command, args []string) (err error) {
+	Cmd.Run(Cmd, args)
 
 	if operation != "" && curd {
-		console.Exit("Custom operations cannot be specified at the same time as CURD operations.")
+		console.Error("Custom operations cannot be specified at the same time as CURD operations.")
 		return
 	}
 
@@ -40,9 +52,15 @@ func GenOperation(_ *cobra.Command, _ []string) (err error) {
 		return
 	}
 
-	files := map[StubCode]string{
-		FromStubImport: "logic",
-		FromStubTypes:  "types",
+	files := []Files{
+		{
+			Code: FromStubImport,
+			Name: "logic",
+		},
+		{
+			Code: FromStubTypes,
+			Name: "types",
+		},
 	}
 	var wg sync.WaitGroup
 	errChan := make(chan error, 10)
@@ -52,7 +70,7 @@ func GenOperation(_ *cobra.Command, _ []string) (err error) {
 	}
 
 	wg.Add(len(files))
-	for code, file := range files {
+	for _, info := range files {
 		go func(wg *sync.WaitGroup, code StubCode, file string) {
 			defer wg.Done()
 			filePath := fmt.Sprintf("app/http/%s/logic/%s/%s.go", body.Apply, body.LowerModel, file)
@@ -60,7 +78,7 @@ func GenOperation(_ *cobra.Command, _ []string) (err error) {
 			if err != nil {
 				errChan <- err
 			}
-		}(&wg, code, file)
+		}(&wg, info.Code, info.Name)
 	}
 
 	go func() {
@@ -69,18 +87,53 @@ func GenOperation(_ *cobra.Command, _ []string) (err error) {
 	}()
 
 	for errs := range errChan {
-		if err != nil {
+		if errs != nil {
 			console.Error(errs.Error())
 			return
 		}
 	}
 
-	// make chan
-	//opt := make(chan )
+	// make operation.
+	errs := make(chan error, 20)
+	files = []Files{
+		{
+			Code: FromStubLogicFunc,
+			Name: "logic",
+		},
+		{
+			Code: FromStubTypeFunc,
+			Name: "types",
+		},
+	}
 	if curd {
 		// CURD
-		for _, s := range OptMap {
-			DoGenOperation(s)
+		OptMap := []Opts{
+			{
+				Name: "Index",
+				Desc: "Get page list",
+			},
+			{
+				Name: "Show",
+				Desc: "Get info",
+			},
+			{
+				Name: "Create",
+				Desc: "Save one source",
+			},
+			{
+				Name: "Update",
+				Desc: "Modifying a resource",
+			},
+			{
+				Name: "Destroy",
+				Desc: "Delete a resource",
+			},
+		}
+		for _, opt := range OptMap {
+			for _, info := range files {
+				filePath := fmt.Sprintf("app/http/%s/logic/%s/%s.go", body.Apply, body.LowerModel, info.Name)
+				DoGenOperation(filePath, opt.Name, opt.Desc, info.Code, errs)
+			}
 		}
 	} else {
 		// Custom
@@ -88,14 +141,24 @@ func GenOperation(_ *cobra.Command, _ []string) (err error) {
 			console.Error("invalid operation name.")
 			return
 		}
-		DoGenOperation(operation)
+		for _, info := range files {
+			filePath := fmt.Sprintf("app/http/%s/logic/%s/%s.go", body.Apply, body.LowerModel, info.Name)
+			if desc == "" {
+				desc = operation
+			}
+			DoGenOperation(filePath, operation, desc, info.Code, errs)
+		}
+	}
+
+	close(errs)
+	for err = range errs {
+		if err != nil {
+			console.Error(err.Error())
+			return
+		}
 	}
 
 	console.Success("Done.")
 
 	return
-}
-
-func DoGenOperation(opt string) {
-
 }

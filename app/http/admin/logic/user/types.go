@@ -1,4 +1,4 @@
-package {{.LowerModel}}
+package user
 
 import (
 	"github.com/gin-ctl/zero/package/http"
@@ -23,3 +23,19 @@ import (
 //	}
 //	return
 //}
+
+type Ping struct {
+    // TODO: add your params.
+}
+
+func (r *Ping) ParseAndCheckParams(c *gin.Context) (err error) {
+	err = http.Parse(c, r)
+	if err != nil {
+		return
+	}
+	if err = validator.ValidateStructWithOutCtx(r); err != nil {
+		return
+	}
+	// TODO: add your logic check.
+	return
+}

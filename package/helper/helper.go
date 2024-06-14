@@ -148,20 +148,44 @@ func InsertOffset(lines []string, new, offset string) []string {
 
 // AppendToFile appends the given content to the end of the specified file
 func AppendToFile(filePath string, content string) error {
-	// Read the existing content from the file
-	existingContent, err := os.ReadFile(filePath)
+	// Open the file for read and write operations.
+	// If the file does not exist, an error is returned.
+	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
+		return fmt.Errorf("failed to open file: %w", err)
 	}
 
-	// Append the new content to the existing content
-	newContent := append(existingContent, content...)
-
-	// Write the new content back to the file
-	err = os.WriteFile(filePath, newContent, os.ModePerm)
+	// Get the status information of the file.
+	stat, err := file.Stat()
 	if err != nil {
-		return fmt.Errorf("failed to write to file: %w", err)
+		return fmt.Errorf("failed to get file info: %w", err)
 	}
+
+	// If the file is not empty, check if the last byte is a newline character.
+	if stat.Size() > 0 {
+		// Gets the last byte of the file.
+		lastByte := make([]byte, 1)
+		_, err = file.ReadAt(lastByte, stat.Size()-1)
+		if err != nil {
+			return fmt.Errorf("failed to read last byte: %w", err)
+		}
+
+		// If the last byte is not a newline character, a newline character is added.
+		if lastByte[0] != '\n' {
+			_, err = file.WriteString("\n")
+			if err != nil {
+				return fmt.Errorf("failed to write newline to file: %w", err)
+			}
+		}
+	}
+
+	// Append new content and wrap lines automatically.
+	_, err = file.WriteString("\n" + content + "\n")
+	if err != nil {
+		return fmt.Errorf("failed to write content to file: %w", err)
+	}
+
+	err = file.Close()
 
 	return nil
 }
@@ -172,11 +196,11 @@ func GetFileContent(filePath string) (content string, err error) {
 	if err != nil {
 		return
 	}
-	defer file.Close()
 	data, err := io.ReadAll(file)
 	if err != nil {
 		return
 	}
 	content = string(data)
+	err = file.Close()
 	return
 }
