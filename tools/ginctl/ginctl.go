@@ -20,12 +20,12 @@ func main() {
 	}
 
 	rootCmd.AddCommand(
-		api.Cmd,
-		apply.Cmd,
-		grpc.Cmd,
 		model.Cmd,
+		api.Cmd,
 		middleware.Cmd,
 		route.Cmd,
+		apply.Cmd,
+		grpc.Cmd,
 	)
 
 	// Execute command.

@@ -7,6 +7,7 @@ import (
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/cobra"
 	"os"
+	"strings"
 	"text/template"
 )
 
@@ -35,6 +36,7 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 		console.Error("invalid apply name.")
 		return
 	}
+	apply = strings.ToLower(apply)
 
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -48,23 +50,21 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 		return
 	}
 
-	temp, err := template.ParseFiles(fmt.Sprintf("%s/tools/ginctl/route/stub/route.stub", pwd))
-	if err != nil {
-		console.Error(err.Error())
-		return
-	}
-
 	filePath := fmt.Sprintf("%s/route.go", dir)
 	if _, errs := os.Stat(filePath); os.IsNotExist(errs) {
+		temp, ee := template.ParseFiles(fmt.Sprintf("%s/tools/ginctl/route/stub/route.stub", pwd))
+		if ee != nil {
+			console.Error(ee.Error())
+			return
+		}
+
 		var r Template
 		r.Route = strcase.ToCamel(apply)
-
 		newFile, ers := os.Create(filePath)
 		if ers != nil {
 			console.Error(ers.Error())
 			return
 		}
-
 		defer newFile.Close()
 
 		err = temp.Execute(newFile, r)
@@ -73,41 +73,32 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 			return
 		}
 
-		insert := fmt.Sprintf(
-			"func Register%sApiRoute(router *gin.Engine) {\n\t// route not found.\n\thttp.Alert404Route(router)\n\t// global middleware.\n\tRegisterGlobalMiddleware(router)\n\t// Initialize route.\n\troute.Register%sAPI(router)\n}",
-			r.Route, r.Route)
-		routePath := fmt.Sprintf("%s/bootstrap/route.go", pwd)
-		lines, er := helper.ReadLines(routePath)
+		imports, e := helper.GetFileContent(fmt.Sprintf("%s/tools/ginctl/route/stub/import.stub", pwd))
+		if e != nil {
+			console.Error(e.Error())
+			return
+		}
+		imports = strings.Replace(imports, "{{.LowerApply}}", apply, -1)
+		route := fmt.Sprintf("%s/bootstrap/route.go", pwd)
+		err = helper.InsertImport(route, imports, "import ", "")
+		if err != nil {
+			console.Error(err.Error())
+			return
+		}
+
+		content, er := helper.GetFileContent(fmt.Sprintf("%s/tools/ginctl/route/stub/register_route.stub", pwd))
 		if er != nil {
 			console.Error(er.Error())
 			return
 		}
-		if !helper.CheckLineIsExisted(lines, insert) {
-			modifiedLines := helper.InsertOffset(
-				lines, insert, "// {{.ApiRoute}}")
-			err = helper.WriteLines(routePath, modifiedLines)
-			if err != nil {
-				console.Error(err.Error())
-				return
-			}
-
-			imports := fmt.Sprintf("\t\"github.com/gin-ctl/zero/app/http/%s/route\"", apply)
-			lines, er = helper.ReadLines(routePath)
-			if er != nil {
-				console.Error(er.Error())
-				return
-			}
-			if !helper.CheckLineIsExisted(lines, imports) {
-				modifiedLines = helper.InsertOffset(
-					lines, imports, "// {{.Import}}")
-				err = helper.WriteLines(routePath, modifiedLines)
-				if err != nil {
-					console.Error(err.Error())
-					return
-				}
-			}
+		content = strings.Replace(content, "{{.LowerApply}}", apply, -1)
+		content = strings.Replace(content, "{{.Apply}}", strcase.ToCamel(apply), -1)
+		err = helper.AppendToFile(route, content)
+		if err != nil {
+			console.Error(err.Error())
+			return
 		}
+		console.Success(fmt.Sprintf("Exist %s route done.", apply))
 	}
-	console.Success("Done.")
 	return
 }

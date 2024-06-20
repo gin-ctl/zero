@@ -3,7 +3,6 @@ package apply
 import "github.com/spf13/cobra"
 
 var (
-	apply          string
 	withModel      bool
 	withMiddleware bool
 )
@@ -16,7 +15,7 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	Cmd.Flags().StringVarP(&apply, "apply", "a", "", "Specify apply name")
+	//Cmd.Flags().StringVarP(&Apply, "apply", "a", "", "Specify apply name")
 	Cmd.Flags().BoolVarP(&withModel, "model", "m", false, "Specify apply name")
 	Cmd.Flags().BoolVarP(&withMiddleware, "middleware", "w", false, "Specify apply name")
 }

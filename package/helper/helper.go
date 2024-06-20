@@ -2,11 +2,13 @@ package helper
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"os"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 	"unicode"
@@ -15,8 +17,8 @@ import (
 
 // BcryptHash Encrypt passwords using bcrypt.
 func BcryptHash(password string) (pw string, err error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 12)
-	return string(bytes), err
+	fromPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+	return string(fromPassword), err
 }
 
 // BcryptCheck Compare the plaintext password with the database hash.
@@ -203,4 +205,91 @@ func GetFileContent(filePath string) (content string, err error) {
 	content = string(data)
 	err = file.Close()
 	return
+}
+
+// InsertImport 插入新的import路径到指定的Go文件中
+func InsertImport(filePath, newImport, format, t string) error {
+	// 读取文件内容
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("无法读取文件: %w", err)
+	}
+	formatStr := format + "("
+	// 找到import块
+	startIndex := bytes.Index(data, []byte(formatStr))
+	if startIndex == -1 {
+		return fmt.Errorf("not found " + format)
+	}
+	endIndex := bytes.Index(data[startIndex:], []byte(")"))
+	if endIndex == -1 {
+		return fmt.Errorf("not found " + format)
+	}
+	endIndex += startIndex
+
+	// 提取import块的内容并进行排序
+	importBlock := data[startIndex:endIndex]
+	importLines := strings.Split(string(importBlock), "\n")
+	var imports []string
+	for _, line := range importLines {
+		line = strings.TrimSpace(line)
+		if line != "" && line != formatStr && line != ")" {
+			imports = append(imports, line)
+		}
+	}
+	if !Contains(imports, newImport) {
+		imports = append(imports, newImport)
+	}
+	sort.Strings(imports)
+
+	// 构造新的import块
+	var newImportBlock strings.Builder
+	newImportBlock.WriteString(formatStr + "\n")
+	for _, imp := range imports {
+		newImportBlock.WriteString("\t" + imp + "\n")
+	}
+	newImportBlock.WriteString(t + ")")
+
+	// 构造新的文件内容
+	var newFileContent bytes.Buffer
+	newFileContent.Write(data[:startIndex])
+	newFileContent.WriteString(newImportBlock.String())
+	newFileContent.Write(data[endIndex+1:])
+
+	// 写入修改后的内容到文件
+	err = os.WriteFile(filePath, newFileContent.Bytes(), os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("无法写入文件: %w", err)
+	}
+
+	return nil
+}
+
+func GetModule(pwd string) (module string) {
+	file, err := os.Open(pwd + "/go.mod")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.HasPrefix(line, "module ") {
+			return strings.TrimSpace(strings.TrimPrefix(line, "module "))
+		}
+	}
+
+	if err = scanner.Err(); err != nil {
+		return
+	}
+	return
+}
+
+func Contains[T comparable](slice []T, element T) bool {
+	for _, v := range slice {
+		if v == element {
+			return true
+		}
+	}
+	return false
 }

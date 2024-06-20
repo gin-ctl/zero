@@ -1,22 +1,20 @@
 package bootstrap
 
 import (
-	"github.com/gin-ctl/zero/app/http/demo/route"
-
-	// {{.Import}}
-	"github.com/gin-ctl/zero/app/middleware"
+	admin "github.com/gin-ctl/zero/app/http/admin/route"
+	demo "github.com/gin-ctl/zero/app/http/demo/route"
+	"github.com/gin-ctl/zero/middleware"
 	"github.com/gin-ctl/zero/package/http"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterGlobalMiddleware(router *gin.Engine) {
-	router.Use(
+func RegisterGlobalMiddleware(r *gin.Engine) {
+	r.Use(
+		middlewares.Auth(),
 		middlewares.Logger(),
 		middlewares.Recovery(),
 		middlewares.Cors(),
 		middlewares.ForceUA(),
-		// register global middleware.
-		// {{.GlobalMiddleware}}
 	)
 }
 
@@ -26,7 +24,14 @@ func RegisterDemoApiRoute(router *gin.Engine) {
 	// global middleware.
 	RegisterGlobalMiddleware(router)
 	// Initialize route.
-	route.RegisterDemoAPI(router)
+	demo.RegisterDemoAPI(router)
 }
 
-// {{.ApiRoute}}
+func RegisterAdminApiRoute(router *gin.Engine) {
+	// route not found.
+	http.Alert404Route(router)
+	// global middleware.
+	RegisterGlobalMiddleware(router)
+	// Initialize route.
+	admin.RegisterAdminAPI(router)
+}

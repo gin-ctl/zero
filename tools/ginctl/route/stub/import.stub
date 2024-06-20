@@ -1,0 +1,1 @@
+{{.LowerApply}} "github.com/gin-ctl/zero/app/http/{{.LowerApply}}/route"
