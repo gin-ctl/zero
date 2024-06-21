@@ -73,12 +73,7 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 			return
 		}
 
-		imports, e := helper.GetFileContent(fmt.Sprintf("%s/tools/ginctl/route/stub/import.stub", pwd))
-		if e != nil {
-			console.Error(e.Error())
-			return
-		}
-		imports = strings.Replace(imports, "{{.LowerApply}}", apply, -1)
+		imports := fmt.Sprintf("%s \"%s/app/http/%s/route\"", apply, helper.GetModule(pwd), apply)
 		route := fmt.Sprintf("%s/bootstrap/route.go", pwd)
 		err = helper.InsertImport(route, imports, "import ", "")
 		if err != nil {
