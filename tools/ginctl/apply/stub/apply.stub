@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-ctl/zero/bootstrap"
-	"github.com/gin-ctl/zero/package/get"
+	"{{.Module}}/bootstrap"
+	"{{.Module}}/package/get"
 	"github.com/gin-gonic/gin"
 	"log"
 )

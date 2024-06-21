@@ -22,7 +22,7 @@ type Template struct {
 var Cmd = &cobra.Command{
 	Use:   "route",
 	Short: "make route",
-	Long:  ``,
+	Long:  `Example: route -a web`,
 	RunE:  GenRoute,
 }
 
