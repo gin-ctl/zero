@@ -1,8 +1,8 @@
-func Register{{.Apply}}ApiRoute(router *gin.Engine) {
+func Register%sApiRoute(router *gin.Engine) {
 	// route not found.
 	http.Alert404Route(router)
 	// global middleware.
 	RegisterGlobalMiddleware(router)
 	// Initialize route.
-	{{.LowerApply}}.Register{{.Apply}}API(router)
+	%s.Register%sAPI(router)
 }

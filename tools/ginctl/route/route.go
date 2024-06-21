@@ -86,8 +86,8 @@ func GenRoute(_ *cobra.Command, _ []string) (err error) {
 			console.Error(er.Error())
 			return
 		}
-		content = strings.Replace(content, "{{.LowerApply}}", apply, -1)
-		content = strings.Replace(content, "{{.Apply}}", strcase.ToCamel(apply), -1)
+		camelApply := strcase.ToCamel(apply)
+		content = fmt.Sprintf(content, camelApply, apply, camelApply)
 		err = helper.AppendToFile(route, content)
 		if err != nil {
 			console.Error(err.Error())
