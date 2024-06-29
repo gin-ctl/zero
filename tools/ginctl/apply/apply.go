@@ -8,6 +8,7 @@ import (
 var (
 	name   string
 	module string
+	flags  string
 )
 
 var Cmd = &cobra.Command{
@@ -33,6 +34,7 @@ var subCmdMap = map[string]int{
 func init() {
 	Cmd.Flags().StringVarP(&name, "name", "n", "", "Specify apply name")
 	Cmd.Flags().StringVarP(&module, "module", "m", "api", "Specify module name")
+	api.Flags().StringVarP(&flags, "flags", "f", "api", "Specify module name")
 	Cmd.AddCommand(api)
 }
 
@@ -55,7 +57,7 @@ func GenHttpApply(cmd *cobra.Command, _ []string) (err error) {
 	}
 
 	subCmd := cmd.Commands()[index]
-	subCmd.SetArgs([]string{module, "-a", name})
+	subCmd.SetArgs([]string{module, "-f", name})
 	//switch module {
 	//case Api:
 	//

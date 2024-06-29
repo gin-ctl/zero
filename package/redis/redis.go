@@ -15,16 +15,16 @@ type RdsClient struct {
 	Context context.Context
 }
 
-// one 确保全局的 Redis 对象只实例一次
-var once sync.Once
-
 // rds 全局 Redis，使用 db 1
-var rds *RdsClient
+var (
+	Rds  *RdsClient
+	Once sync.Once
+)
 
 // ConnectRedis 连接 redis 数据库，设置全局的 Redis 对象
 func ConnectRedis(address string, username string, password string, db int) {
-	once.Do(func() {
-		rds = NewClient(address, username, password, db)
+	Once.Do(func() {
+		Rds = NewClient(address, username, password, db)
 	})
 }
 

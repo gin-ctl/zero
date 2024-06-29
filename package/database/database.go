@@ -5,16 +5,22 @@ import (
 	"github.com/gin-ctl/zero/package/logger"
 	"gorm.io/gorm"
 	gl "gorm.io/gorm/logger"
+	"sync"
 	"time"
 )
 
-var DB *gorm.DB
+var (
+	DB   *gorm.DB
+	Once sync.Once
+)
 
 // Connect 连接数据库
 func Connect(dbConfig gorm.Dialector, _logger gl.Interface) (err error) {
 	// 使用 gorm.Open 连接数据库
-	DB, err = gorm.Open(dbConfig, &gorm.Config{
-		Logger: _logger,
+	Once.Do(func() {
+		DB, err = gorm.Open(dbConfig, &gorm.Config{
+			Logger: _logger,
+		})
 	})
 
 	// 处理错误
